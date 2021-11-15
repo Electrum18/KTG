@@ -1,31 +1,93 @@
+@import url(https://fonts.googleapis.com/css?family=Neucha);
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@keyframes showTablet {
-  from {
-    box-shadow: 10rem 20rem 30rem black;
-    transform: translateY(100%) scale(1.2) perspective(10rem)
-      rotate3d(1, 0, 0, 0deg) rotate(0deg);
-  }
+html {
+  background: black;
+  overflow: hidden;
+  font-family: "Neucha", cursive;
+}
 
-  70% {
-    box-shadow: 10rem 20rem 30rem black;
-    transform: translateY(20%) scale(1.2) perspective(10rem)
-      rotate3d(1, 0, 0, 0deg) rotate(0deg);
+@keyframes showArm {
+  from {
+    transform: translateY(100%) scale(0.5);
   }
 
   to {
-    box-shadow: 2rem 15rem 10rem black;
-    transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 3deg)
-      rotate(-10deg);
+    transform: translateY(0%) scale(1);
+  }
+}
+
+@keyframes showIcons {
+  from {
+    transform: translateY(100%) scale(1.2);
+  }
+
+  to {
+    transform: translateY(0%) scale(1);
+  }
+}
+
+@keyframes showNotepad {
+  from {
+    transform: translateY(120%) scale(1.2) perspective(10rem)
+      rotate3d(1, 0, 0, 5deg) rotate(-5deg);
+  }
+
+  to {
+    transform: translateY(20%) scale(1) perspective(10rem)
+      rotate3d(1, 0, 0, 5deg) rotate(-5deg);
   }
 }
 
 #tablet {
-  box-shadow: 2rem 15rem 10rem black;
   transform-style: preserve-3d;
-  transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 3deg)
-    rotate(-10deg);
-  animation: showTablet 1.5s ease-in-out;
+}
+
+#hand {
+  filter: drop-shadow(-2rem 2rem 5rem #000);
+  transform: translateY(0%) scale(1);
+  animation: showArm 1.5s ease-in-out;
+}
+
+#loading-paper {
+  filter: drop-shadow(2rem 5rem 2rem black);
+  transform-style: preserve-3d;
+  transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 5deg)
+    rotate(-30deg);
+}
+
+#loading-paper p {
+  transform: rotate(5deg);
+}
+
+.icons {
+  filter: drop-shadow(1rem 1rem 2rem black);
+  animation: showIcons 1s ease-in-out;
+}
+
+.icons > div:nth-child(1) {
+  transform: rotate(5deg);
+}
+
+.icons > div:nth-child(2) {
+  transform: rotate(-10deg);
+}
+
+.borders {
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px !important;
+}
+
+.choose-button {
+  @apply text-gray-800 border-2 border-gray-800 rounded-lg p-4 my-2 text-xl tracking-wider break-all hover:underline;
+}
+
+.notepad {
+  filter: drop-shadow(2rem 5rem 2rem black);
+  transform-style: preserve-3d;
+  transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 5deg)
+    rotate(-5deg);
+  animation: showNotepad 1s ease-in-out;
 }

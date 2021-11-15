@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes showTablet {
+  from {
+    box-shadow: 10rem 20rem 30rem black;
+    transform: translateY(100%) scale(1.2) perspective(10rem)
+      rotate3d(1, 0, 0, 0deg) rotate(0deg);
+  }
+
+  70% {
+    box-shadow: 10rem 20rem 30rem black;
+    transform: translateY(20%) scale(1.2) perspective(10rem)
+      rotate3d(1, 0, 0, 0deg) rotate(0deg);
+  }
+
+  to {
+    box-shadow: 2rem 15rem 10rem black;
+    transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 3deg)
+      rotate(-10deg);
+  }
+}
+
+#tablet {
+  box-shadow: 2rem 15rem 10rem black;
+  transform-style: preserve-3d;
+  transform: translateY(20%) perspective(10rem) rotate3d(1, 0, 0, 3deg)
+    rotate(-10deg);
+  animation: showTablet 1.5s ease-in-out;
+}

@@ -1,8 +1,11 @@
 import Image from "next/image";
 
 import { useEffect, useState } from "react";
+import shallow from "zustand/shallow";
 
 import useSound from "use-sound";
+
+import useQuestions from "../helpers/questions";
 
 import styles from "../styles/game.module.css";
 
@@ -44,9 +47,7 @@ function Hand({ selectedId }) {
   );
 }
 
-export default function QuestionTablet() {
-  const [animationState, setAnimationState] = useState(0);
-
+function Sounds(setAnimationState) {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
     onend: () => {
@@ -65,18 +66,28 @@ export default function QuestionTablet() {
     },
   });
 
-  const [question, setQuestion] = useState("Что такое горилка?");
+  return [playStart, playPlacePaper, playChoose];
+}
 
-  const [quotes, setQuotes] = useState([
-    "Маленькая обезьянка",
-    "Паяльная лампа",
-    "Водка на украинском",
-    "Медийная личность",
-  ]);
+export default function QuestionTablet() {
+  const [animationState, setAnimationState] = useState(0);
 
-  const [rightQueue, setRightQueue] = useState("Водка на украинском");
+  const [playStart, playPlacePaper, playChoose] = Sounds(setAnimationState);
+
+  const [inQuestion, inVariants, inResult] = useQuestions(
+    (state) => [state.question, state.variants, state.result],
+    shallow
+  );
+
+  const [question, setQuestion] = useState();
+  const [variants, setVariants] = useState();
+  const [rightQueue, setRightQueue] = useState();
 
   const [selectedId, setSelectedId] = useState(null);
+
+  useEffect(() => setQuestion(inQuestion), [inQuestion]);
+  useEffect(() => setVariants(inVariants), [inVariants]);
+  useEffect(() => setRightQueue(inResult), [inResult]);
 
   useEffect(() => {
     if (playStart) playStart();
@@ -108,7 +119,7 @@ export default function QuestionTablet() {
       >
         <h2
           className={
-            (question.length < 32 ? "text-4xl" : "text-2xl") +
+            ((question || "").length < 32 ? "text-4xl" : "text-2xl") +
             " mx-8 text-center break-all"
           }
         >
@@ -117,11 +128,11 @@ export default function QuestionTablet() {
 
         <div
           className={
-            (question.length < 32 ? "mt-8" : "mt-4") +
+            ((question || "").length < 32 ? "mt-8" : "mt-4") +
             " mx-8 flex flex-col px-8"
           }
         >
-          {quotes.map((quote, id) => (
+          {(variants || []).map((quote, id) => (
             <button
               key={quote}
               onPointerEnter={() => setSelectedId(id)}

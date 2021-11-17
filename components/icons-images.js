@@ -1,4 +1,6 @@
-function IconsImages() {
+import Image from "next/image";
+
+export default function IconsImages() {
   return (
     <div className="icons absolute flex flex-row bottom-0 left-0 m-4">
       <div>

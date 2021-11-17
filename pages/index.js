@@ -1,11 +1,37 @@
+import { useEffect } from "react";
+
 import Head from "next/head";
 import Image from "next/image";
+
+import io from "socket.io-client";
 
 import QuestionTablet from "../components/question-tablet";
 import NotepadScore from "../components/notepad-score";
 import IconsImages from "../components/icons-images";
 
+import useQuestions from "../helpers/questions";
+
 export default function Home() {
+  const setQuestions = useQuestions((state) => state.setQuestions);
+
+  useEffect(() => {
+    fetch("/api/socketio").finally(() => {
+      const socket = io();
+
+      socket.on("connect", () => {
+        console.log("connect");
+
+        socket.emit("get questions");
+      });
+
+      socket.on("responce", (data) => setQuestions(data));
+
+      socket.on("disconnect", () => {
+        console.log("disconnect");
+      });
+    });
+  }, []);
+
   return (
     <>
       <Head>

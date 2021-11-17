@@ -1,12 +1,9 @@
 import { Server } from "socket.io";
 
 import { readFileSync } from "fs";
-import path from "path/posix";
+import path from "path";
 
-const questions = readFileSync(
-  path.resolve(__dirname, "../docs/questions.txt"),
-  "utf8"
-);
+const questions = readFileSync(path.resolve("./docs/questions.txt"), "utf8");
 
 const parsedQuestions = questions
   .split("\n")
@@ -26,11 +23,13 @@ const ioHandler = (req, res) => {
     io.on("connection", (socket) => {
       socket.on("get questions", () => {
         socket.emit("responce", {
-          stage: 2,
+          stage: 1,
           question,
           variants: variants.split(";"),
           result,
         });
+
+        setTimeout(() => socket.emit("responce", { stage: 3 }), 3e3);
       });
     });
 

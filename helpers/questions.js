@@ -7,7 +7,16 @@ const useQuestions = create((set) => ({
   result: undefined,
 
   setQuestions: ({ stage, question, variants, result }) =>
-    set({ stage, question, variants, result }),
+    set(() => {
+      const output = {};
+
+      if (stage) output.stage = stage;
+      if (question) output.question = question;
+      if (variants) output.variants = variants;
+      if (result) output.result = result;
+
+      return output;
+    }),
 }));
 
 export default useQuestions;

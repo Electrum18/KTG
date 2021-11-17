@@ -5,11 +5,14 @@ import shallow from "zustand/shallow";
 
 import useSound from "use-sound";
 
-import useQuestions from "../helpers/questions";
-
-import styles from "../styles/game.module.css";
+import useQuestions from "../../helpers/questions";
 
 const tabletStyles = [
+  {
+    filter: "drop-shadow(10rem 20rem 30rem black)",
+    transform:
+      "translateY(140%) scale(1.2) perspective(10rem) rotate3d(1, 0, 0, 0deg) rotate(0deg)",
+  },
   {
     filter: "drop-shadow(10rem 20rem 30rem black)",
     transform:
@@ -51,7 +54,7 @@ function Sounds(setAnimationState) {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
     onend: () => {
-      setAnimationState(1);
+      setAnimationState(2);
     },
   });
 
@@ -74,8 +77,8 @@ export default function QuestionTablet() {
 
   const [playStart, playPlacePaper, playChoose] = Sounds(setAnimationState);
 
-  const [inQuestion, inVariants, inResult] = useQuestions(
-    (state) => [state.question, state.variants, state.result],
+  const [inStage, inQuestion, inVariants, inResult] = useQuestions(
+    (state) => [state.stage, state.question, state.variants, state.result],
     shallow
   );
 
@@ -85,23 +88,18 @@ export default function QuestionTablet() {
 
   const [selectedId, setSelectedId] = useState(null);
 
+  useEffect(() => setAnimationState(inStage), [inStage]);
   useEffect(() => setQuestion(inQuestion), [inQuestion]);
   useEffect(() => setVariants(inVariants), [inVariants]);
   useEffect(() => setRightQueue(inResult), [inResult]);
 
   useEffect(() => {
-    if (playStart) playStart();
-  }, [playStart]);
+    if (animationState == 1 && playStart) playStart();
+  }, [animationState, playStart]);
 
   useEffect(() => {
     switch (animationState) {
-      case 1:
-        setTimeout(() => {
-          setAnimationState(2);
-        }, 2e3);
-        break;
-
-      case 2:
+      case 3:
         playPlacePaper();
         break;
     }
@@ -144,7 +142,7 @@ export default function QuestionTablet() {
           ))}
         </div>
 
-        {animationState > 1 && <Hand selectedId={selectedId} />}
+        {animationState > 2 && <Hand selectedId={selectedId} />}
       </div>
 
       <div className="z-0 pointer-events-none">

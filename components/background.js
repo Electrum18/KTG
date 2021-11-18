@@ -9,6 +9,7 @@ export default function Background() {
           alt="Задний фон игры"
           width={1920}
           height={1080}
+          loading="eager"
         />
       </div>
 
@@ -25,6 +26,7 @@ export default function Background() {
             alt="Бумага загрузки"
             width={220 * 1.5}
             height={270 * 1.5}
+            loading="eager"
           />
         </div>
       </div>

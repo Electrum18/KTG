@@ -23,6 +23,7 @@ export default function NotepadScore() {
             alt="Блокнот выигрыша"
             width={400 * 0.8}
             height={480 * 0.8}
+            loading="eager"
           />
         </div>
       </div>

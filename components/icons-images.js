@@ -15,6 +15,7 @@ export default function IconsImages() {
             alt="Аватар игрока"
             width={400 * 0.5}
             height={480 * 0.5}
+            loading="eager"
           />
         </div>
       </div>
@@ -31,6 +32,7 @@ export default function IconsImages() {
             alt="Аватар ведущего"
             width={400 * 0.5}
             height={480 * 0.5}
+            loading="eager"
           />
         </div>
       </div>

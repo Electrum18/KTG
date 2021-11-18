@@ -1,18 +1,27 @@
 import { useEffect } from "react";
 
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 import io from "socket.io-client";
 
-import Background from "../components/background";
-import QuestionTablet from "../components/tablets/question";
-import NotepadScore from "../components/notepad-score";
-import IconsImages from "../components/icons-images";
+import Background from "../../components/background";
+import QuestionTablet from "../../components/tablets/question";
+import NotepadScore from "../../components/notepad-score";
+import IconsImages from "../../components/icons-images";
 
-import useQuestions from "../helpers/questions";
+import useQuestions from "../../helpers/questions";
+
+const rightIndex = "123";
 
 export default function Home() {
+  const router = useRouter();
+
+  const { index } = router.query;
+
   const setQuestions = useQuestions((state) => state.setQuestions);
+
+  useEffect(() => index && index !== rightIndex && router.push("/"), [index]);
 
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
@@ -38,7 +47,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Create Next App</title>
+        <title>Страница игры | КТГ</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

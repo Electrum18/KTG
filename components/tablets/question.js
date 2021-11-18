@@ -45,6 +45,7 @@ function Hand({ selectedId }) {
         alt="Рука"
         width={820 * 0.6}
         height={780 * 0.6}
+        loading="eager"
       />
     </div>
   );
@@ -151,6 +152,7 @@ export default function QuestionTablet() {
           alt="Клипборд"
           width={512}
           height={512 * 1.5}
+          loading="eager"
         />
       </div>
     </div>

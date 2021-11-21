@@ -88,6 +88,10 @@ html {
   @apply text-gray-800 border-2 border-gray-800 rounded-lg m-2 w-auto text-base tracking-wider hover:underline;
 }
 
+.choose-button3 {
+  @apply text-gray-800 border-2 border-gray-800 rounded-lg ml-auto mr-0 px-2 w-auto text-base tracking-wider hover:underline;
+}
+
 .notepad {
   filter: drop-shadow(2rem 5rem 2rem black);
   transform-style: preserve-3d;

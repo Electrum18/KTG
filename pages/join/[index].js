@@ -8,7 +8,7 @@ import LoginTablet from "../../components/tablets/enter-to-game";
 
 const rightIndex = "123";
 
-export default function Home() {
+export default function Join() {
   const router = useRouter();
 
   const { index } = router.query;

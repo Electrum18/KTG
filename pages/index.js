@@ -41,7 +41,7 @@ function Paper() {
       <div className="z-10">
         <Image
           src="/assets/paper.png"
-          alt="Доска"
+          alt="Оповещение"
           width={220 * 2}
           height={270 * 2}
           loading="eager"
@@ -64,7 +64,7 @@ function Note() {
       <div className="z-10">
         <Image
           src="/assets/note.png"
-          alt="Доска"
+          alt="Логотип"
           width={565 / 2}
           height={480 / 2}
           loading="eager"

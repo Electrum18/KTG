@@ -14,7 +14,7 @@ import useQuestions from "../../helpers/questions";
 
 const rightIndex = "123";
 
-export default function Home() {
+export default function Game() {
   const router = useRouter();
 
   const { index } = router.query;

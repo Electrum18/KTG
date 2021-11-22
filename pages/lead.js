@@ -1,120 +1,69 @@
 import Head from "next/head";
 import Image from "next/image";
 
+import { useEffect, useState } from "react";
+
+import io from "socket.io-client";
+
 import Background from "../components/background";
+
+import CreateGame from "../components/lead-phases/create";
+import JoinGamePhase from "../components/lead-phases/player-join";
 
 const style = {
   corckboard: {
     filter: "drop-shadow(2rem 5rem 5rem black)",
     transform: "perspective(10rem) rotate3d(1, 0, 0, 5deg)",
   },
-  paper: {
-    width: "fit-content",
-    left: "50%",
-    position: "absolute",
-    top: "65%",
-    transform: "translate(-50%, -50%)",
-  },
-  paper2: {
-    width: "fit-content",
-    left: "30%",
-    position: "absolute",
-    top: "27%",
-    transform: "translate(-50%, -50%) rotate(5deg)",
-  },
-  photo: {
-    transform: "rotate(5deg)",
-  },
-  text: { transform: "rotate(-5deg)" },
 };
 
-function Avatar() {
-  return (
-    <div className="absolute mt-12 right-12" style={style.photo}>
-      <div className="absolute z-10 w-full h-full flex flex-col justify-end">
-        <button className="choose-button2 borders">выбрать аватар</button>
-      </div>
-
-      <div className="z-0 pointer-events-none">
-        <Image
-          src="/assets/icon-frame.png"
-          alt="Аватар игрока"
-          width={400 * 0.5}
-          height={480 * 0.5}
-          loading="eager"
+function LeadPhase({ phase, setPhase, joinIndex, socket }) {
+  switch (phase) {
+    case 1:
+      return (
+        <JoinGamePhase
+          setPhase={setPhase}
+          joinIndex={joinIndex}
+          socket={socket}
         />
-      </div>
-    </div>
-  );
-}
+      );
 
-function PaperUpper() {
-  return (
-    <div style={style.paper2}>
-      <div
-        className="absolute z-30 w-full h-full flex flex-col p-8 justify-center"
-        style={style.text}
-      >
-        <p className="text-2xl"> Логин </p>
-
-        <input
-          type="text"
-          placeholder="Введите ваш логин"
-          className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
-        />
-      </div>
-
-      <div className="z-20">
-        <Image
-          src="/assets/paper2.png"
-          alt="Оповещение"
-          width={270 * 1.2}
-          height={220 * 0.8}
-          loading="eager"
-        />
-      </div>
-    </div>
-  );
-}
-
-function Paper() {
-  return (
-    <div style={style.paper}>
-      <div
-        className="absolute z-30 w-full h-full flex flex-col p-8"
-        style={style.text}
-      >
-        <h1 className="text-2xl tracking-widest text-center">Создание игры</h1>
-
-        <h2 className="text-xl tracking-widest mt-8">Выбор вопросов</h2>
-
-        <input
-          type="file"
-          placeholder="Введите ваш логин"
-          className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
-        />
-
-        <button className="choose-button3 borders">скачать пример</button>
-
-        <div className="mt-4 w-full flex flex-col">
-          <button className="choose-button2 borders">создать</button>
-        </div>
-      </div>
-
-      <div className="z-10">
-        <Image
-          src="/assets/paper2.png"
-          alt="Оповещение"
-          width={270 * 2}
-          height={220 * 2}
-          loading="eager"
-        />
-      </div>
-    </div>
-  );
+    case 0:
+    default:
+      return <CreateGame setPhase={setPhase} />;
+  }
 }
 
 export default function Lead() {
+  const [phase, setPhase] = useState(0);
+  const [joinIndex, setJoinIndex] = useState();
+
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/socketio").finally(() => {
+      const socket = io();
+
+      socket.on("connect", () => {
+        console.log("connect");
+
+        socket.emit("get join index");
+      });
+
+      socket.on("responce", (data) => {
+        console.log(data);
+      });
+
+      socket.on("set join index", setJoinIndex);
+
+      socket.on("disconnect", () => {
+        console.log("disconnect");
+      });
+
+      setSocket(socket);
+    });
+  }, []);
+
   return (
     <>
       <Head>
@@ -127,9 +76,12 @@ export default function Lead() {
 
         <div className="absolute bottom-10 mx-auto" style={style.corckboard}>
           <div className="absolute w-full h-full top-0 z-10">
-            <Paper />
-            <PaperUpper />
-            <Avatar />
+            <LeadPhase
+              phase={phase}
+              setPhase={setPhase}
+              joinIndex={joinIndex}
+              socket={socket}
+            />
           </div>
 
           <div className="z-0 pointer-events-none">

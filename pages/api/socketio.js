@@ -24,6 +24,11 @@ export const config = {
 
 const joinIndex = Math.random().toString(36).substring(2);
 
+const lead = {
+  id: undefined,
+  nickname: undefined,
+};
+
 function Socket(socket) {
   socket.on("get questions", () => {
     socket.emit("responce", {
@@ -36,6 +41,14 @@ function Socket(socket) {
 
   socket.on("get join index", () => {
     socket.emit("set join index", joinIndex);
+  });
+
+  socket.on("login lead", (data) => {
+    if (!data.nickname && !lead.nickname && !lead.id) return;
+
+    lead.nickname = data.nickname;
+
+    socket.emit("responce", socket.id);
   });
 }
 

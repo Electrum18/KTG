@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 
 const style = {
   paper: {
@@ -41,7 +42,7 @@ function Avatar() {
   );
 }
 
-function PaperUpper() {
+function PaperUpper({ nickname, setNickname }) {
   return (
     <div style={style.paper2}>
       <div
@@ -54,6 +55,8 @@ function PaperUpper() {
           type="text"
           placeholder="Введите ваш логин"
           className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value.substring(0, 16))}
         />
       </div>
 
@@ -70,7 +73,7 @@ function PaperUpper() {
   );
 }
 
-function Paper({ setPhase }) {
+function Paper({ setPhase, socket, nickname }) {
   return (
     <div style={style.paper}>
       <div
@@ -93,8 +96,14 @@ function Paper({ setPhase }) {
 
         <div className="mt-4 w-full flex flex-col">
           <button
-            className="choose-button2 borders"
-            onClick={() => setPhase(1)}
+            className={
+              "choose-button2 borders " + (nickname.length ? "" : "disabled")
+            }
+            onClick={() =>
+              socket.emit("login lead", {
+                nickname,
+              })
+            }
           >
             создать
           </button>
@@ -114,11 +123,13 @@ function Paper({ setPhase }) {
   );
 }
 
-export default function CreateGame({ setPhase }) {
+export default function CreateGame({ setPhase, socket }) {
+  const [nickname, setNickname] = useState("");
+
   return (
     <>
-      <Paper setPhase={setPhase} />
-      <PaperUpper />
+      <Paper setPhase={setPhase} socket={socket} nickname={nickname} />
+      <PaperUpper nickname={nickname} setNickname={setNickname} />
       <Avatar />
     </>
   );

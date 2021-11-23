@@ -30,7 +30,7 @@ function LeadPhase({ phase, setPhase, joinIndex, socket }) {
 
     case 0:
     default:
-      return <CreateGame setPhase={setPhase} />;
+      return <CreateGame setPhase={setPhase} socket={socket} />;
   }
 }
 

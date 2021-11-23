@@ -21,7 +21,7 @@ export default function Game() {
 
   const setQuestions = useQuestions((state) => state.setQuestions);
 
-  useEffect(() => index && index !== rightIndex && router.push("/"), [index]);
+  //useEffect(() => index && index !== rightIndex && router.push("/"), [index]);
 
   useEffect(() => {
     fetch("/api/socketio").finally(() => {

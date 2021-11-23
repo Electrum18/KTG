@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 import { useEffect, useState } from "react";
 
@@ -17,48 +18,50 @@ const style = {
   },
 };
 
-function LeadPhase({ phase, setPhase, joinIndex, socket }) {
+function LeadPhase({ phase, setPhase, joinIndex, joinPhase, socket }) {
   switch (phase) {
     case 1:
       return (
         <JoinGamePhase
           setPhase={setPhase}
           joinIndex={joinIndex}
+          joinPhase={joinPhase}
           socket={socket}
         />
       );
 
     case 0:
     default:
-      return <CreateGame setPhase={setPhase} socket={socket} />;
+      return <CreateGame socket={socket} />;
   }
 }
 
 export default function Lead() {
   const [phase, setPhase] = useState(0);
   const [joinIndex, setJoinIndex] = useState();
+  const [joinPhase, setJoinPhase] = useState(0);
 
   const [socket, setSocket] = useState(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
 
       socket.on("connect", () => {
-        console.log("connect");
-
-        socket.emit("get join index");
+        socket.emit("get lead exist");
       });
 
-      socket.on("responce", (data) => {
-        console.log(data);
-      });
+      socket.on("is lead exist", (exist) => exist && router.push("/"));
+      socket.on("leave", () => router.push("/"));
+      socket.on("lead joined", () => router.push("/"));
 
       socket.on("set join index", setJoinIndex);
+      socket.on("set stage", setPhase);
 
-      socket.on("disconnect", () => {
-        console.log("disconnect");
-      });
+      socket.on("player joined", () => setJoinPhase(1));
+      socket.on("player unjoined", () => setJoinPhase(0));
 
       setSocket(socket);
     });
@@ -80,6 +83,7 @@ export default function Lead() {
               phase={phase}
               setPhase={setPhase}
               joinIndex={joinIndex}
+              joinPhase={joinPhase}
               socket={socket}
             />
           </div>

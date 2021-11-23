@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 import { useEffect, useState } from "react";
 
@@ -19,6 +20,12 @@ const style = {
   },
   text: { transform: "rotate(-5deg)" },
 };
+
+const joinPlayerTextEnum = [
+  "Ждем присоедение игрока",
+  "Игрок еще не готов",
+  "Игрок готов к игре!",
+];
 
 function PaperUpper({ joinIndex }) {
   const [joinLink, setJoinLink] = useState();
@@ -59,7 +66,9 @@ function PaperUpper({ joinIndex }) {
   );
 }
 
-function Paper() {
+function Paper({ joinPhase, socket }) {
+  const router = useRouter();
+
   return (
     <div style={style.paper}>
       <div
@@ -70,11 +79,18 @@ function Paper() {
           Ждем игрока
         </h1>
 
-        <h2 className="text-xl tracking-widest mt-8">Игрок еще не готов</h2>
+        <h2 className="text-xl tracking-widest mt-8">
+          {joinPlayerTextEnum[joinPhase]}
+        </h2>
 
         <div className="mt-4 w-full flex flex-col">
           <button className="choose-button2 borders">старт</button>
-          <button className="choose-button3 borders">заново</button>
+          <button
+            className="choose-button3 borders"
+            onClick={() => location.reload()}
+          >
+            заново
+          </button>
         </div>
       </div>
 
@@ -91,10 +107,15 @@ function Paper() {
   );
 }
 
-export default function JoinGamePhase({ setPhase, joinIndex, socket }) {
+export default function JoinGamePhase({
+  setPhase,
+  joinIndex,
+  joinPhase,
+  socket,
+}) {
   return (
     <>
-      <Paper />
+      <Paper joinPhase={joinPhase} socket={socket} />
       <PaperUpper joinIndex={joinIndex} />
     </>
   );

@@ -61,7 +61,7 @@ function Sounds(setAnimationState) {
   return [playPlacePaper, playChoose];
 }
 
-export default function LoginTablet() {
+export default function LoginTablet({ socket }) {
   const [animationState, setAnimationState] = useState(0);
 
   const [playPlacePaper, playChoose] = Sounds(setAnimationState);
@@ -69,6 +69,8 @@ export default function LoginTablet() {
   useEffect(() => {
     if (playPlacePaper) playPlacePaper();
   }, [playPlacePaper]);
+
+  const [nickname, setNickname] = useState("");
 
   return (
     <div
@@ -87,6 +89,8 @@ export default function LoginTablet() {
               type="text"
               placeholder="Введите ваш логин"
               className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value.substring(0, 16))}
             />
           </div>
 
@@ -96,7 +100,13 @@ export default function LoginTablet() {
         </div>
 
         <div className="w-full justify-center flex flex-row">
-          <button className="mx-16 w-full choose-button borders">
+          <button
+            className={
+              "mx-16 w-full choose-button borders " +
+              (nickname.length ? "" : "disabled")
+            }
+            onClick={() => socket.emit("player register", { nickname })}
+          >
             Продолжить
           </button>
         </div>

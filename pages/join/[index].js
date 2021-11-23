@@ -21,25 +21,34 @@ export default function Join() {
     index && joinIndex && index !== joinIndex && router.push("/");
   }, [index, joinIndex]);
 
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
 
       socket.on("connect", () => {
-        console.log("connect");
-
         socket.emit("get join index");
+        socket.emit("is joining");
       });
 
-      socket.on("responce", (data) => {
-        console.log(data);
-      });
+      socket.on("leave", () => router.push("/"));
 
       socket.on("set join index", setJoinIndex);
 
-      socket.on("disconnect", () => {
-        console.log("disconnect");
+      socket.on("game created", (statusOrIndex) => {
+        if (statusOrIndex === "exit") {
+          router.push("/");
+        } else {
+          try {
+            router.push("/game/" + statusOrIndex);
+          } catch (_) {
+            router.push("/");
+          }
+        }
       });
+
+      setSocket(socket);
     });
   }, []);
 
@@ -52,7 +61,7 @@ export default function Join() {
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
-        <LoginTablet />
+        <LoginTablet socket={socket} />
       </main>
     </>
   );

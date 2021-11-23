@@ -73,7 +73,7 @@ function PaperUpper({ nickname, setNickname }) {
   );
 }
 
-function Paper({ setPhase, socket, nickname }) {
+function Paper({ socket, nickname }) {
   return (
     <div style={style.paper}>
       <div
@@ -123,12 +123,12 @@ function Paper({ setPhase, socket, nickname }) {
   );
 }
 
-export default function CreateGame({ setPhase, socket }) {
+export default function CreateGame({ socket }) {
   const [nickname, setNickname] = useState("");
 
   return (
     <>
-      <Paper setPhase={setPhase} socket={socket} nickname={nickname} />
+      <Paper socket={socket} nickname={nickname} />
       <PaperUpper nickname={nickname} setNickname={setNickname} />
       <Avatar />
     </>

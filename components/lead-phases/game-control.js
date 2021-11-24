@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { useRouter } from "next/router";
 
 import { useEffect, useState } from "react";
 
@@ -66,7 +65,21 @@ function PaperUpper({ gameIndex }) {
   );
 }
 
+const subtextEnum = [
+  "Назовите вопрос и нажмите далее",
+  "Ожидайте выбор вопроса игроком",
+  "Игрок выбрал вопрос, ваше мнение?",
+];
+
+const socketMethodEnum = ["question readed", undefined, "question taken"];
+
 function Paper({ gamePhase, socket }) {
+  const [disabled, setDisabled] = useState();
+
+  useEffect(() => {
+    setDisabled(gamePhase === 1);
+  }, [gamePhase]);
+
   return (
     <div style={style.paper}>
       <div
@@ -82,13 +95,16 @@ function Paper({ gamePhase, socket }) {
         </p>
 
         <div className="text-base text-gray-500 tracking-widest mx-2">
-          Назовите вопрос и нажмите далее
+          {gamePhase + 1 + " | " + subtextEnum[gamePhase]}
         </div>
 
         <div className="w-full flex flex-col">
           <button
-            className="choose-button2 borders"
-            onClick={() => socket.emit("question readed")}
+            className={"choose-button2 borders " + (disabled ? "disabled" : "")}
+            onClick={() =>
+              socketMethodEnum[gamePhase] &&
+              socket.emit(socketMethodEnum[gamePhase])
+            }
           >
             далее
           </button>

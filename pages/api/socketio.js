@@ -35,9 +35,10 @@ const join = {
 };
 
 const game = {
-  id: undefined,
+  id: generateId(),
   socketId: undefined,
   nickname: undefined,
+  choosedId: undefined,
 };
 
 function LeadAPI(socket, io) {
@@ -61,6 +62,8 @@ function LeadAPI(socket, io) {
 
   socket.on("question readed", () => {
     io.to(game.socketId).emit("set game phase", { stage: 3 });
+
+    socket.emit("lead telled");
   });
 }
 
@@ -107,7 +110,6 @@ function GameAPI(socket, io) {
       stage: 1,
       question,
       variants: variants.split(";"),
-      result,
     });
   });
 
@@ -122,10 +124,17 @@ function GameAPI(socket, io) {
 
     io.to(game.socketId).emit("game created", game.id);
   });
+
+  socket.on("choosed question", (id) => {
+    game.choosedId = id;
+
+    io.to(lead.id).emit("choosed question");
+  });
 }
 
 function Socket(socket, io) {
   socket.emit("set join index", join.id);
+  socket.emit("set game index", game.id);
 
   LeadAPI(socket, io);
   JoinAPI(socket, io);

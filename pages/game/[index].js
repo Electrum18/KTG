@@ -62,7 +62,7 @@ export default function Game() {
         <Background />
         <IconsImages />
         <NotepadScore />
-        <QuestionTablet />
+        <QuestionTablet socket={socket} />
       </main>
     </>
   );

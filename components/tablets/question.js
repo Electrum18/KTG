@@ -46,7 +46,7 @@ function Hand({ selectedId }) {
   );
 }
 
-function Sounds(setAnimationState) {
+function Sounds(setAnimationState, setChoosed, socket, id) {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
     onend: () => {
@@ -61,33 +61,45 @@ function Sounds(setAnimationState) {
   const [playChoose] = useSound("/sound/click.mp3", {
     volume: 0.5,
     onend: () => {
-      console.log("end");
+      console.log(socket, id);
+
+      if (socket && id) {
+        socket.emit("choosed question", id);
+
+        setChoosed(true);
+
+        console.log("choosed");
+      }
     },
   });
 
   return [playStart, playPlacePaper, playChoose];
 }
 
-export default function QuestionTablet() {
+export default function QuestionTablet({ socket }) {
   const [animationState, setAnimationState] = useState(0);
 
-  const [playStart, playPlacePaper, playChoose] = Sounds(setAnimationState);
+  const [selectedId, setSelectedId] = useState(null);
+  const [choosed, setChoosed] = useState(false);
 
-  const [inStage, inQuestion, inVariants, inResult] = useQuestions(
-    (state) => [state.stage, state.question, state.variants, state.result],
+  const [playStart, playPlacePaper, playChoose] = Sounds(
+    setAnimationState,
+    setChoosed,
+    socket,
+    selectedId
+  );
+
+  const [inStage, inQuestion, inVariants] = useQuestions(
+    (state) => [state.stage, state.question, state.variants],
     shallow
   );
 
   const [question, setQuestion] = useState();
   const [variants, setVariants] = useState();
-  const [rightQueue, setRightQueue] = useState();
-
-  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => setAnimationState(inStage), [inStage]);
   useEffect(() => setQuestion(inQuestion), [inQuestion]);
   useEffect(() => setVariants(inVariants), [inVariants]);
-  useEffect(() => setRightQueue(inResult), [inResult]);
 
   useEffect(() => {
     if (animationState == 0 && playStart) playStart();
@@ -109,7 +121,7 @@ export default function QuestionTablet() {
       style={tabletStyles[animationState]}
     >
       <div
-        onPointerLeave={() => setSelectedId(null)}
+        onPointerLeave={() => !choosed && setSelectedId(null)}
         className="absolute z-10 w-full h-full pt-48"
       >
         <h2
@@ -130,16 +142,16 @@ export default function QuestionTablet() {
           {(variants || []).map((quote, id) => (
             <button
               key={quote}
-              onPointerEnter={() => setSelectedId(id)}
+              onPointerEnter={() => !choosed && setSelectedId(id)}
               onClick={() => playChoose()}
-              className="choose-button borders"
+              className={"choose-button borders " + (choosed ? "disabled" : "")}
             >
               {quote}
             </button>
           ))}
         </div>
 
-        {animationState > 1 && <Hand selectedId={selectedId} />}
+        {animationState > 1 && !choosed && <Hand selectedId={selectedId} />}
       </div>
 
       <div className="z-0 pointer-events-none">

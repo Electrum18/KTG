@@ -59,7 +59,7 @@ export default function Lead() {
   const [joinPhase, setJoinPhase] = useState([0, undefined]);
 
   const [gameIndex, setGameIndex] = useState();
-  const [gamePhase, setGamePhase] = useState([0, undefined]);
+  const [gamePhase, setGamePhase] = useState(0);
 
   const [socket, setSocket] = useState(null);
 
@@ -81,6 +81,7 @@ export default function Lead() {
       socket.on("set game index", setGameIndex);
 
       socket.on("lead telled", () => setGamePhase(1));
+      socket.on("choosed question", () => setGamePhase(2));
 
       socket.on("set stage", setPhase);
 

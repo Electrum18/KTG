@@ -67,8 +67,6 @@ function PaperUpper({ joinIndex }) {
 }
 
 function Paper({ joinPhase, socket }) {
-  const router = useRouter();
-
   return (
     <div style={style.paper}>
       <div
@@ -80,11 +78,21 @@ function Paper({ joinPhase, socket }) {
         </h1>
 
         <h2 className="text-xl tracking-widest mt-8">
-          {joinPlayerTextEnum[joinPhase]}
+          <span>{joinPlayerTextEnum[joinPhase[0]]}</span>
+
+          {joinPhase[1] && <div> Ник: {joinPhase[1]} </div>}
         </h2>
 
         <div className="mt-4 w-full flex flex-col">
-          <button className="choose-button2 borders">старт</button>
+          <button
+            className={
+              "choose-button2 borders " + (joinPhase[0] === 2 ? "" : "disabled")
+            }
+            onClick={() => socket.emit("start game")}
+          >
+            старт
+          </button>
+
           <button
             className="choose-button3 borders"
             onClick={() => location.reload()}

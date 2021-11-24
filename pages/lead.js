@@ -39,7 +39,7 @@ function LeadPhase({ phase, setPhase, joinIndex, joinPhase, socket }) {
 export default function Lead() {
   const [phase, setPhase] = useState(0);
   const [joinIndex, setJoinIndex] = useState();
-  const [joinPhase, setJoinPhase] = useState(0);
+  const [joinPhase, setJoinPhase] = useState([0, undefined]);
 
   const [socket, setSocket] = useState(null);
 
@@ -60,8 +60,9 @@ export default function Lead() {
       socket.on("set join index", setJoinIndex);
       socket.on("set stage", setPhase);
 
-      socket.on("player joined", () => setJoinPhase(1));
-      socket.on("player unjoined", () => setJoinPhase(0));
+      socket.on("player ready", (nickname) => setJoinPhase([2, nickname]));
+      socket.on("player joined", () => setJoinPhase([1, undefined]));
+      socket.on("player unjoined", () => setJoinPhase([0, undefined]));
 
       setSocket(socket);
     });

@@ -40,24 +40,9 @@ const game = {
   nickname: undefined,
 };
 
-function Socket(socket, io) {
-  socket.emit("set join index", join.id);
-
-  socket.on("get questions", () => {
-    socket.emit("responce", {
-      stage: 1,
-      question,
-      variants: variants.split(";"),
-      result,
-    });
-  });
-
+function LeadAPI(socket) {
   socket.on("get lead exist", () => {
     socket.emit("is lead exist", lead.id && lead.nickname);
-  });
-
-  socket.on("get join index", () => {
-    socket.emit("set join index", join.id);
   });
 
   socket.on("login lead", (data) => {
@@ -73,6 +58,12 @@ function Socket(socket, io) {
 
     socket.broadcast.emit("lead joined");
   });
+}
+
+function JoinAPI(socket, io) {
+  socket.on("get join index", () => {
+    socket.emit("set join index", join.id);
+  });
 
   socket.on("is joining", () => {
     if (game.socketId) return;
@@ -82,7 +73,7 @@ function Socket(socket, io) {
     socket.broadcast.emit("player joined");
   });
 
-  socket.on("player register", (data) => {
+  socket.on("player ready", (data) => {
     if (!data.nickname || game.socketId) return;
 
     game.nickname = data.nickname;
@@ -90,13 +81,52 @@ function Socket(socket, io) {
 
     game.id = generateId();
 
+    socket.broadcast.emit("player ready", game.nickname);
+  });
+
+  socket.on("player changing", () => {
+    game.nickname = undefined;
+    game.socketId = undefined;
+
+    game.id = generateId();
+
+    io.emit("player joined");
+  });
+}
+
+function GameAPI(socket) {
+  socket.on("start game", () => {
+    if (!game.id && !game.socketId) return;
+
     socket.emit("game created", game.id);
     socket.broadcast.emit("game created", "exit");
   });
+}
+
+function Socket(socket, io) {
+  socket.emit("set join index", join.id);
+
+  socket.on("get questions", () => {
+    socket.emit("responce", {
+      stage: 1,
+      question,
+      variants: variants.split(";"),
+      result,
+    });
+  });
+
+  LeadAPI(socket);
+  JoinAPI(socket, io);
+  GameAPI(socket);
 
   socket.on("disconnect", () => {
     if (join.socketId === socket.id) {
       join.socketId = undefined;
+
+      game.nickname = undefined;
+      game.socketId = undefined;
+
+      game.id = generateId();
 
       socket.broadcast.emit("player unjoined");
     } else if (lead.id === socket.id) {
@@ -104,6 +134,11 @@ function Socket(socket, io) {
       lead.nickname = undefined;
 
       join.id = generateId();
+
+      game.nickname = undefined;
+      game.socketId = undefined;
+
+      game.id = generateId();
 
       io.emit("leave");
     }

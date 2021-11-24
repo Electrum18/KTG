@@ -61,7 +61,7 @@ function Sounds(setAnimationState) {
   return [playPlacePaper, playChoose];
 }
 
-export default function LoginTablet({ socket }) {
+export default function LoginTablet({ socket, preWaiting, setPreWaiting }) {
   const [animationState, setAnimationState] = useState(0);
 
   const [playPlacePaper, playChoose] = Sounds(setAnimationState);
@@ -72,45 +72,72 @@ export default function LoginTablet({ socket }) {
 
   const [nickname, setNickname] = useState("");
 
+  const [waiting, setWaiting] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setWaiting(preWaiting), 1e3 * +preWaiting);
+  }, [preWaiting]);
+
   return (
     <div
       id="tablet"
       className={"absolute bottom-0 mx-auto transition-all duration-500"}
       style={tabletStyles[animationState]}
     >
-      <div className="absolute z-10 w-full h-full pt-48">
-        <h2 className="text-4xl mx-8 text-center"> Вход в игру </h2>
+      {waiting ? (
+        <div className="absolute z-10 w-full h-full pt-48">
+          <h2 className="text-4xl mx-8 text-center"> Ожидание разрешения </h2>
 
-        <div className="flex flex-row mt-8 mx-8 p-8 mb-4">
-          <div className="flex flex-col w-3/5">
-            <p className="text-2xl"> Логин </p>
-
-            <input
-              type="text"
-              placeholder="Введите ваш логин"
-              className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value.substring(0, 16))}
-            />
-          </div>
-
-          <div className="flex flex-col w-2/5">
-            <Avatar />
+          <div className="w-full justify-center flex flex-row">
+            <button
+              className={"mx-16 w-full choose-button borders"}
+              onClick={() => socket.emit("player changing")}
+            >
+              Изменить
+            </button>
           </div>
         </div>
+      ) : (
+        <div className="absolute z-10 w-full h-full pt-48">
+          <h2 className="text-4xl mx-8 text-center"> Вход в игру </h2>
 
-        <div className="w-full justify-center flex flex-row">
-          <button
-            className={
-              "mx-16 w-full choose-button borders " +
-              (nickname.length ? "" : "disabled")
-            }
-            onClick={() => socket.emit("player register", { nickname })}
-          >
-            Продолжить
-          </button>
+          <div className="flex flex-row mt-8 mx-8 p-8 mb-4">
+            <div className="flex flex-col w-3/5">
+              <p className="text-2xl"> Логин </p>
+
+              <input
+                type="text"
+                placeholder="Введите ваш логин"
+                className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value.substring(0, 16))}
+              />
+            </div>
+
+            <div className="flex flex-col w-2/5">
+              <Avatar />
+            </div>
+          </div>
+
+          <div className="w-full justify-center flex flex-row">
+            <button
+              className={
+                "mx-16 w-full choose-button borders " +
+                (nickname.length ? "" : "disabled")
+              }
+              onClick={() => {
+                socket.emit("player ready", { nickname });
+
+                setPreWaiting(true);
+                setAnimationState(0);
+                playPlacePaper();
+              }}
+            >
+              Продолжить
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="z-0 pointer-events-none">
         <Image

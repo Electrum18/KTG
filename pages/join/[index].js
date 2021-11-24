@@ -23,6 +23,8 @@ export default function Join() {
 
   const [socket, setSocket] = useState(null);
 
+  const [preWaiting, setPreWaiting] = useState(false);
+
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
@@ -35,6 +37,10 @@ export default function Join() {
       socket.on("leave", () => router.push("/"));
 
       socket.on("set join index", setJoinIndex);
+
+      socket.on("player joined", () => {
+        setPreWaiting(false);
+      });
 
       socket.on("game created", (statusOrIndex) => {
         if (statusOrIndex === "exit") {
@@ -61,7 +67,11 @@ export default function Join() {
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
-        <LoginTablet socket={socket} />
+        <LoginTablet
+          socket={socket}
+          preWaiting={preWaiting}
+          setPreWaiting={setPreWaiting}
+        />
       </main>
     </>
   );

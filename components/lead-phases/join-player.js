@@ -115,12 +115,7 @@ function Paper({ joinPhase, socket }) {
   );
 }
 
-export default function JoinGamePhase({
-  setPhase,
-  joinIndex,
-  joinPhase,
-  socket,
-}) {
+export default function JoinGamePhase({ joinIndex, joinPhase, socket }) {
   return (
     <>
       <Paper joinPhase={joinPhase} socket={socket} />

@@ -9,7 +9,8 @@ import io from "socket.io-client";
 import Background from "../components/background";
 
 import CreateGame from "../components/lead-phases/create";
-import JoinGamePhase from "../components/lead-phases/player-join";
+import JoinGamePhase from "../components/lead-phases/join-player";
+import GameControl from "../components/lead-phases/game-control";
 
 const style = {
   corckboard: {
@@ -18,12 +19,27 @@ const style = {
   },
 };
 
-function LeadPhase({ phase, setPhase, joinIndex, joinPhase, socket }) {
+function LeadPhase({
+  phase,
+  joinIndex,
+  joinPhase,
+  gameIndex,
+  gamePhase,
+  socket,
+}) {
   switch (phase) {
+    case 2:
+      return (
+        <GameControl
+          gameIndex={gameIndex}
+          gamePhase={gamePhase}
+          socket={socket}
+        />
+      );
+
     case 1:
       return (
         <JoinGamePhase
-          setPhase={setPhase}
           joinIndex={joinIndex}
           joinPhase={joinPhase}
           socket={socket}
@@ -38,8 +54,12 @@ function LeadPhase({ phase, setPhase, joinIndex, joinPhase, socket }) {
 
 export default function Lead() {
   const [phase, setPhase] = useState(0);
+
   const [joinIndex, setJoinIndex] = useState();
   const [joinPhase, setJoinPhase] = useState([0, undefined]);
+
+  const [gameIndex, setGameIndex] = useState();
+  const [gamePhase, setGamePhase] = useState([0, undefined]);
 
   const [socket, setSocket] = useState(null);
 
@@ -54,10 +74,14 @@ export default function Lead() {
       });
 
       socket.on("is lead exist", (exist) => exist && router.push("/"));
-      socket.on("leave", () => router.push("/"));
       socket.on("lead joined", () => router.push("/"));
+      socket.on("leave", () => location.reload());
 
       socket.on("set join index", setJoinIndex);
+      socket.on("set game index", setGameIndex);
+
+      socket.on("lead telled", () => setGamePhase(1));
+
       socket.on("set stage", setPhase);
 
       socket.on("player ready", (nickname) => setJoinPhase([2, nickname]));
@@ -82,10 +106,11 @@ export default function Lead() {
           <div className="absolute w-full h-full top-0 z-10">
             <LeadPhase
               phase={phase}
-              setPhase={setPhase}
+              socket={socket}
               joinIndex={joinIndex}
               joinPhase={joinPhase}
-              socket={socket}
+              gameIndex={gameIndex}
+              gamePhase={gamePhase}
             />
           </div>
 

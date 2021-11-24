@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -12,35 +12,42 @@ import IconsImages from "../../components/icons-images";
 
 import useQuestions from "../../helpers/questions";
 
-const rightIndex = "123";
-
 export default function Game() {
+  const [gameIndex, setGameIndex] = useState();
+
+  const [level, setLevel] = useState(0);
+
   const router = useRouter();
 
   const { index } = router.query;
 
-  const setQuestions = useQuestions((state) => state.setQuestions);
+  const [socket, setSocket] = useState(null);
 
-  //useEffect(() => index && index !== rightIndex && router.push("/"), [index]);
+  useEffect(() => {
+    if (index && gameIndex && index !== gameIndex) {
+      router.push("/");
+    } else if (socket) {
+      socket.emit("register success");
+    }
+  }, [index, gameIndex, socket]);
+
+  const setQuestions = useQuestions((state) => state.setQuestions);
 
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
 
       socket.on("connect", () => {
-        console.log("connect");
-
-        socket.emit("get questions");
+        socket.emit("get game index");
       });
 
-      socket.on("responce", (data) => {
-        console.log(data);
-        setQuestions(data);
-      });
+      socket.on("leave", () => router.push("/"));
 
-      socket.on("disconnect", () => {
-        console.log("disconnect");
-      });
+      socket.on("set game index", setGameIndex);
+      socket.on("set game phase", setQuestions);
+      socket.on("set game questions", setQuestions);
+
+      setSocket(socket);
     });
   }, []);
 

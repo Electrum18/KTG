@@ -43,15 +43,7 @@ export default function Join() {
       });
 
       socket.on("game created", (statusOrIndex) => {
-        if (statusOrIndex === "exit") {
-          router.push("/");
-        } else {
-          try {
-            router.push("/game/" + statusOrIndex);
-          } catch (_) {
-            router.push("/");
-          }
-        }
+        router.push("/game/" + statusOrIndex);
       });
 
       setSocket(socket);

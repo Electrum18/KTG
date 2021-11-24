@@ -40,7 +40,7 @@ const game = {
   nickname: undefined,
 };
 
-function LeadAPI(socket) {
+function LeadAPI(socket, io) {
   socket.on("get lead exist", () => {
     socket.emit("is lead exist", lead.id && lead.nickname);
   });
@@ -58,6 +58,10 @@ function LeadAPI(socket) {
 
     socket.broadcast.emit("lead joined");
   });
+
+  socket.on("question readed", () => {
+    io.to(game.socketId).emit("set game phase", { stage: 3 });
+  });
 }
 
 function JoinAPI(socket, io) {
@@ -74,7 +78,9 @@ function JoinAPI(socket, io) {
   });
 
   socket.on("player ready", (data) => {
-    if (!data.nickname || game.socketId) return;
+    if (!data.nickname || game.socketId) {
+      return socket.emit("set join index", generateId());
+    }
 
     game.nickname = data.nickname;
     game.socketId = socket.id;
@@ -94,20 +100,10 @@ function JoinAPI(socket, io) {
   });
 }
 
-function GameAPI(socket) {
-  socket.on("start game", () => {
-    if (!game.id && !game.socketId) return;
-
-    socket.emit("game created", game.id);
-    socket.broadcast.emit("game created", "exit");
-  });
-}
-
-function Socket(socket, io) {
-  socket.emit("set join index", join.id);
-
-  socket.on("get questions", () => {
-    socket.emit("responce", {
+function GameAPI(socket, io) {
+  socket.on("get game index", () => {
+    socket.emit("set game index", game.id);
+    socket.emit("set game questions", {
       stage: 1,
       question,
       variants: variants.split(";"),
@@ -115,9 +111,25 @@ function Socket(socket, io) {
     });
   });
 
-  LeadAPI(socket);
+  socket.on("register success", () => {
+    game.socketId = socket.id;
+  });
+
+  socket.on("start game", () => {
+    if (!game.id && !game.socketId) return;
+
+    socket.emit("set stage", 2);
+
+    io.to(game.socketId).emit("game created", game.id);
+  });
+}
+
+function Socket(socket, io) {
+  socket.emit("set join index", join.id);
+
+  LeadAPI(socket, io);
   JoinAPI(socket, io);
-  GameAPI(socket);
+  GameAPI(socket, io);
 
   socket.on("disconnect", () => {
     if (join.socketId === socket.id) {
@@ -129,7 +141,9 @@ function Socket(socket, io) {
       game.id = generateId();
 
       socket.broadcast.emit("player unjoined");
-    } else if (lead.id === socket.id) {
+    } else if (lead.id === socket.id || game.socketId === socket.id) {
+      io.emit("leave");
+
       lead.id = undefined;
       lead.nickname = undefined;
 
@@ -139,8 +153,6 @@ function Socket(socket, io) {
       game.socketId = undefined;
 
       game.id = generateId();
-
-      io.emit("leave");
     }
   });
 }

@@ -16,11 +16,6 @@ const tabletStyles = [
   {
     filter: "drop-shadow(10rem 20rem 30rem black)",
     transform:
-      "translateY(140%) scale(1.2) perspective(10rem) rotate3d(1, 0, 0, 0deg) rotate(0deg)",
-  },
-  {
-    filter: "drop-shadow(10rem 20rem 30rem black)",
-    transform:
       "translateY(70%) scale(1.2) perspective(10rem) rotate3d(1, 0, 0, 0deg) rotate(0deg)",
   },
   {
@@ -55,7 +50,7 @@ function Sounds(setAnimationState) {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
     onend: () => {
-      setAnimationState(2);
+      setAnimationState(1);
     },
   });
 
@@ -95,13 +90,14 @@ export default function QuestionTablet() {
   useEffect(() => setRightQueue(inResult), [inResult]);
 
   useEffect(() => {
-    if (animationState == 1 && playStart) playStart();
+    if (animationState == 0 && playStart) playStart();
   }, [animationState, playStart]);
 
   useEffect(() => {
     switch (animationState) {
       case 3:
         playPlacePaper();
+        setAnimationState(2);
         break;
     }
   }, [animationState]);
@@ -143,7 +139,7 @@ export default function QuestionTablet() {
           ))}
         </div>
 
-        {animationState > 2 && <Hand selectedId={selectedId} />}
+        {animationState > 1 && <Hand selectedId={selectedId} />}
       </div>
 
       <div className="z-0 pointer-events-none">

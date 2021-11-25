@@ -43,32 +43,28 @@ function Avatar() {
   );
 }
 
-function Sounds(setAnimationState) {
-  const [playPlacePaper] = useSound("/sound/item-placed.mp3", {
-    volume: 0.25,
-    onend: () => {
-      setAnimationState(1);
-    },
-  });
-
-  const [playChoose] = useSound("/sound/click.mp3", {
-    volume: 0.5,
-    onend: () => {
-      console.log("end");
-    },
-  });
-
-  return [playPlacePaper, playChoose];
-}
-
 export default function LoginTablet({ socket, preWaiting, setPreWaiting }) {
   const [animationState, setAnimationState] = useState(0);
 
-  const [playPlacePaper, playChoose] = Sounds(setAnimationState);
+  const [playPlacePaper] = useSound("/sound/item-placed.mp3", {
+    volume: 0.25,
+  });
+
+  const [playPen] = useSound("/sound/pen-at-paper.mp3", {
+    volume: 0.25,
+  });
 
   useEffect(() => {
-    if (playPlacePaper) playPlacePaper();
-  }, [playPlacePaper]);
+    if (animationState === 0) {
+      setTimeout(playPen, 500);
+
+      setTimeout(() => {
+        setAnimationState(1);
+      }, 3000);
+    } else {
+      setTimeout(playPlacePaper, 300);
+    }
+  }, [animationState]);
 
   const [nickname, setNickname] = useState("");
 

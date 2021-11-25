@@ -2,6 +2,8 @@ import Image from "next/image";
 
 import { useEffect, useState } from "react";
 
+import useSound from "use-sound";
+
 const style = {
   paper: {
     width: "fit-content",
@@ -19,13 +21,18 @@ const style = {
   },
   paper3: {
     width: "fit-content",
-    left: "75%",
+    right: "-15%",
     position: "absolute",
     top: "30%",
     transform: "translate(-50%, -50%) rotate(5deg)",
   },
   text: { transform: "rotate(-5deg)" },
 };
+
+const prices = [
+  1_000_000, 500_000, 250_000, 125_000, 64_000, 32_000, 16_000, 8_000, 4_000,
+  2_000, 1_000, 500, 300, 200, 100, 0,
+];
 
 function PaperUpper({ gameIndex }) {
   const [joinLink, setJoinLink] = useState();
@@ -66,16 +73,18 @@ function PaperUpper({ gameIndex }) {
   );
 }
 
-function PaperUpperRight() {
+function PaperUpperRight({ userInfo }) {
   return (
     <div style={style.paper3}>
       <div
         className="absolute z-30 w-full h-full flex flex-col p-8 justify-center"
         style={style.text}
       >
-        <p className="text-2xl"> Никнейм </p>
-        <p className="text-2xl"> Уровень </p>
-        <p className="text-2xl"> Очки </p>
+        <p className="text-2xl"> Никнейм: {userInfo.nickname} </p>
+        <p className="text-2xl"> Уровень: {userInfo.level} </p>
+        <p className="text-2xl">
+          Очки: {prices[prices.length - 1 - userInfo.level]}
+        </p>
       </div>
 
       <div className="z-20">
@@ -102,9 +111,21 @@ const socketMethodEnum = ["question readed", undefined, "question taken"];
 function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
   const [disabled, setDisabled] = useState();
 
+  const [playChoose] = useSound("/sound/click.mp3", {
+    volume: 0.5,
+  });
+
+  const [playPlayerChoosed] = useSound("/sound/notice.mp3", {
+    volume: 0.5,
+  });
+
   useEffect(() => {
     setDisabled(gamePhase === 1);
   }, [gamePhase]);
+
+  useEffect(() => {
+    if (gamePhase === 2 && playPlayerChoosed) playPlayerChoosed();
+  }, [gamePhase, playPlayerChoosed]);
 
   return (
     <div style={style.paper}>
@@ -133,17 +154,22 @@ function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
         <div className="w-full flex flex-col">
           <button
             className={"choose-button2 borders " + (disabled ? "disabled" : "")}
-            onClick={() =>
-              socketMethodEnum[gamePhase] &&
-              socket.emit(socketMethodEnum[gamePhase])
-            }
+            onClick={() => {
+              if (socketMethodEnum[gamePhase]) {
+                socket.emit(socketMethodEnum[gamePhase]);
+                playChoose();
+              }
+            }}
           >
             далее
           </button>
 
           <button
             className="choose-button3 borders"
-            onClick={() => location.reload()}
+            onClick={() => {
+              location.reload();
+              playChoose();
+            }}
           >
             заново
           </button>
@@ -170,6 +196,7 @@ export default function GameControl({
   gamePhase,
   gameChoose,
   socket,
+  userInfo,
 }) {
   return (
     <>
@@ -183,7 +210,7 @@ export default function GameControl({
 
       <PaperUpper gameIndex={gameIndex} />
 
-      <PaperUpperRight />
+      <PaperUpperRight userInfo={userInfo} />
     </>
   );
 }

@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import io from "socket.io-client";
 
 import Background from "../../components/background";
+import Light from "../../components/lighting";
 import QuestionTablet from "../../components/tablets/question";
 import NotepadScore from "../../components/notepad-score";
 import IconsImages from "../../components/icons-images";
@@ -20,6 +21,7 @@ export default function Game() {
   const { index } = router.query;
 
   const [socket, setSocket] = useState(null);
+  const [players, setPlayers] = useState({});
 
   useEffect(() => {
     if (index && gameIndex && index !== gameIndex) {
@@ -39,11 +41,17 @@ export default function Game() {
         socket.emit("get game index");
       });
 
-      socket.on("leave", () => router.push("/"));
+      socket.on("leave", () => location.reload());
 
       socket.on("set game index", setGameIndex);
       socket.on("set game phase", setQuestions);
       socket.on("set game questions", setQuestions);
+
+      socket.on("get game players", setPlayers);
+
+      socket.on("game ended", (score) => {
+        router.push(`/result?score=${score}`);
+      });
 
       setSocket(socket);
 
@@ -64,10 +72,12 @@ export default function Game() {
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
-        <IconsImages />
+        <IconsImages players={players} />
         <NotepadScore />
         <QuestionTablet socket={socket} />
       </main>
+
+      <Light />
     </>
   );
 }

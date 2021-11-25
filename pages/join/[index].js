@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import io from "socket.io-client";
 
 import Background from "../../components/background";
+import Light from "../../components/lighting";
 import LoginTablet from "../../components/tablets/enter-to-game";
 
 export default function Join() {
@@ -16,8 +17,6 @@ export default function Join() {
   const { index } = router.query;
 
   useEffect(() => {
-    console.log(index, joinIndex);
-
     index && joinIndex && index !== joinIndex && router.push("/");
   }, [index, joinIndex]);
 
@@ -46,6 +45,8 @@ export default function Join() {
         router.push("/game/" + statusOrIndex);
       });
 
+      socket.on("game ended", () => router.push(`/`));
+
       setSocket(socket);
 
       return () => {
@@ -71,6 +72,8 @@ export default function Join() {
           setPreWaiting={setPreWaiting}
         />
       </main>
+
+      <Light />
     </>
   );
 }

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
 import Background from "../components/background";
+import Light from "../components/lighting";
 
 import CreateGame from "../components/lead-phases/create";
 import JoinGamePhase from "../components/lead-phases/join-player";
@@ -31,6 +32,8 @@ function LeadPhase({
   gameIndex,
   gamePhase,
   gameChoose,
+
+  userInfo,
 }) {
   switch (phase) {
     case 2:
@@ -42,6 +45,7 @@ function LeadPhase({
           gamePhase={gamePhase}
           gameChoose={gameChoose}
           socket={socket}
+          userInfo={userInfo}
         />
       );
 
@@ -71,6 +75,8 @@ export default function Lead() {
   const [gameChoose, setGameChoose] = useState("");
   const [gameLevel, setGameLevel] = useState(0);
   const [gameQuestion, setQameQuestion] = useState("");
+
+  const [userInfo, setUserInfo] = useState({});
 
   const [socket, setSocket] = useState(null);
 
@@ -111,6 +117,12 @@ export default function Lead() {
       socket.on("player joined", () => setJoinPhase([1, undefined]));
       socket.on("player unjoined", () => setJoinPhase([0, undefined]));
 
+      socket.on("get player data", setUserInfo);
+
+      socket.on("game ended", (score) => {
+        router.push(`/result?score=${score}&player=lead`);
+      });
+
       setSocket(socket);
 
       return () => {
@@ -143,6 +155,7 @@ export default function Lead() {
               gameIndex={gameIndex}
               gamePhase={gamePhase}
               gameChoose={gameChoose}
+              userInfo={userInfo}
             />
           </div>
 
@@ -157,6 +170,8 @@ export default function Lead() {
           </div>
         </div>
       </main>
+
+      <Light />
     </>
   );
 }

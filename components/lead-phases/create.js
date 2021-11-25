@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import useSound from "use-sound";
+
 const style = {
   paper: {
     width: "fit-content",
@@ -23,10 +25,16 @@ const style = {
 };
 
 function Avatar() {
+  const [playChoose] = useSound("/sound/click.mp3", {
+    volume: 0.5,
+  });
+
   return (
     <div className="absolute mt-12 right-12" style={style.photo}>
       <div className="absolute z-10 w-full h-full flex flex-col justify-end">
-        <button className="choose-button2 borders">выбрать аватар</button>
+        <button className="choose-button2 borders" onClick={() => playChoose()}>
+          выбрать аватар
+        </button>
       </div>
 
       <div className="z-0 pointer-events-none">
@@ -74,6 +82,10 @@ function PaperUpper({ nickname, setNickname }) {
 }
 
 function Paper({ socket, nickname }) {
+  const [playChoose] = useSound("/sound/click.mp3", {
+    volume: 0.5,
+  });
+
   return (
     <div style={style.paper}>
       <div
@@ -92,18 +104,27 @@ function Paper({ socket, nickname }) {
           className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
         />
 
-        <button className="choose-button3 borders">скачать пример</button>
+        <a
+          href="/docs/questions.txt"
+          className="choose-button3 borders"
+          onClick={() => playChoose()}
+          download
+        >
+          скачать пример
+        </a>
 
         <div className="mt-4 w-full flex flex-col">
           <button
             className={
               "choose-button2 borders " + (nickname.length ? "" : "disabled")
             }
-            onClick={() =>
+            onClick={() => {
               socket.emit("login lead", {
                 nickname,
-              })
-            }
+              });
+
+              playChoose();
+            }}
           >
             создать
           </button>

@@ -7,6 +7,14 @@ const prices = [
   2_000, 1_000, 500, 300, 200, 100,
 ];
 
+function addSpaces(value) {
+  if (value.length > 6) {
+    return value.replace(/(\d+)(\d{3})(\d{3})/g, "$1 $2 $3");
+  } else {
+    return value.replace(/(\d+)(\d{3})/g, "$1 $2");
+  }
+}
+
 export default function NotepadScore() {
   const level = useQuestions((state) => state.level);
 
@@ -22,7 +30,7 @@ export default function NotepadScore() {
                 (level > prices.length - 1 - id ? "line-through" : "")
               }
             >
-              {price.toString().replace(/(.{3})/g, "$1 ")}
+              {addSpaces(price.toString())}
             </p>
           ))}
         </div>

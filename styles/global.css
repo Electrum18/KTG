@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 html {
-  background: black;
+  background: url("/assets/game background.png") center/cover;
   overflow: hidden;
   font-family: "Neucha", cursive;
 }
@@ -39,6 +39,21 @@ html {
   to {
     transform: translateY(20%) scale(1) perspective(10rem)
       rotate3d(1, 0, 0, 5deg) rotate(-5deg);
+  }
+}
+
+@keyframes lightBlink {
+  from,
+  90% {
+    background-color: transparent;
+  }
+
+  95% {
+    background-color: #0004;
+  }
+
+  to {
+    background-color: transparent;
   }
 }
 
@@ -94,6 +109,24 @@ html {
 
 .disabled {
   @apply opacity-50 pointer-events-none;
+}
+
+.always-at-top {
+  @apply fixed w-full h-full top-0 left-0;
+}
+
+.lighting {
+  background: url("/assets/lighting.png") center/cover;
+  mix-blend-mode: multiply;
+  @apply pointer-events-none;
+}
+
+.lighting-lamp {
+  background: url("/assets/lamp light.png") center/cover;
+  mix-blend-mode: hard-light;
+  opacity: 0.8;
+  animation: lightBlink 20s ease-in-out infinite;
+  @apply pointer-events-none;
 }
 
 .notepad {

@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 
 import Background from "../components/background";
+import Light from "../components/lighting";
 
 const style = {
   corckboard: {
@@ -105,6 +106,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <Light />
     </>
   );
 }

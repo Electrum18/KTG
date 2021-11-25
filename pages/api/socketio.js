@@ -3,7 +3,10 @@ import { Server } from "socket.io";
 import { readFileSync } from "fs";
 import path from "path";
 
-const questions = readFileSync(path.resolve("./docs/questions.txt"), "utf8");
+const questions = readFileSync(
+  path.resolve("./public/docs/questions.txt"),
+  "utf8"
+);
 
 const parsedQuestions = questions
   .split("\n")
@@ -123,12 +126,15 @@ function GameAPI(socket, io) {
   socket.on("get game index", () => {
     const [question, variants] = getQuestions();
 
+    game.socketId = socket.id;
+
     socket.emit("set game index", game.id);
     socket.emit("set game questions", getGameData(question, variants));
-  });
 
-  socket.on("register success", () => {
-    game.socketId = socket.id;
+    socket.emit("get game players", {
+      lead: lead.nickname,
+      player: game.nickname,
+    });
   });
 
   socket.on("start game", () => {
@@ -140,6 +146,11 @@ function GameAPI(socket, io) {
 
     socket.emit("set game level", 1);
     socket.emit("set game question", question);
+
+    socket.emit("get player data", {
+      nickname: game.nickname,
+      level: game.level,
+    });
 
     io.to(game.socketId).emit("game created", game.id);
   });
@@ -157,7 +168,7 @@ function GameAPI(socket, io) {
 
     const takenQuestion = variants.split(";")[game.choosedId];
 
-    if (takenQuestion === result) {
+    if (takenQuestion === result || game.level > 14) {
       game.level++;
 
       const [question2, variants2] = getQuestions();
@@ -168,8 +179,13 @@ function GameAPI(socket, io) {
       io.emit("set game question", question2);
 
       io.emit("set game questions", getGameData(question2, variants2));
+
+      socket.emit("get player data", {
+        nickname: game.nickname,
+        level: game.level,
+      });
     } else {
-      io.emit("game end");
+      io.emit("game ended", game.level);
     }
   });
 }
@@ -193,7 +209,20 @@ function Socket(socket, io) {
       game.level = 0;
 
       socket.broadcast.emit("player unjoined");
-    } else if (lead.id === socket.id || game.socketId === socket.id) {
+    } else if (game.socketId === socket.id) {
+      io.emit("leave");
+
+      lead.id = undefined;
+      lead.nickname = undefined;
+
+      join.id = generateId();
+
+      game.nickname = undefined;
+      game.socketId = undefined;
+
+      game.id = generateId();
+      game.level = 0;
+    } else if (lead.id === socket.id) {
       io.emit("leave");
 
       lead.id = undefined;

@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { useRouter } from "next/router";
 
 import { useEffect, useState } from "react";
+
+import useSound from "use-sound";
 
 const style = {
   paper: {
@@ -67,6 +68,23 @@ function PaperUpper({ joinIndex }) {
 }
 
 function Paper({ joinPhase, socket }) {
+  const [playChoose] = useSound("/sound/click.mp3", {
+    volume: 0.5,
+  });
+
+  const [playPlayerJoin] = useSound("/sound/notice.mp3", {
+    volume: 0.5,
+  });
+
+  useEffect(() => {
+    if (
+      playPlayerJoin &&
+      joinPlayerTextEnum[joinPhase[0]] === joinPlayerTextEnum[2]
+    ) {
+      playPlayerJoin();
+    }
+  }, [playPlayerJoin, joinPhase]);
+
   return (
     <div style={style.paper}>
       <div
@@ -88,14 +106,20 @@ function Paper({ joinPhase, socket }) {
             className={
               "choose-button2 borders " + (joinPhase[0] === 2 ? "" : "disabled")
             }
-            onClick={() => socket.emit("start game")}
+            onClick={() => {
+              socket.emit("start game");
+              playChoose();
+            }}
           >
             старт
           </button>
 
           <button
             className="choose-button3 borders"
-            onClick={() => location.reload()}
+            onClick={() => {
+              location.reload();
+              playChoose();
+            }}
           >
             заново
           </button>

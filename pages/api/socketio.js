@@ -14,8 +14,6 @@ const parsedQuestions = questions
   })
   .filter((value) => value);
 
-const [question, variants, result] = parsedQuestions[0];
-
 export const config = {
   api: {
     bodyParser: false,
@@ -39,7 +37,23 @@ const game = {
   socketId: undefined,
   nickname: undefined,
   choosedId: undefined,
+  level: 0,
 };
+
+function getQuestions() {
+  const [question, variants, result] = parsedQuestions[game.level];
+
+  return [question, variants, result];
+}
+
+function getGameData(question, variants) {
+  return {
+    stage: 0,
+    level: game.level,
+    question,
+    variants: variants.split(";"),
+  };
+}
 
 function LeadAPI(socket, io) {
   socket.on("get lead exist", () => {
@@ -61,7 +75,7 @@ function LeadAPI(socket, io) {
   });
 
   socket.on("question readed", () => {
-    io.to(game.socketId).emit("set game phase", { stage: 3 });
+    io.to(game.socketId).emit("set game phase", { stage: 2 });
 
     socket.emit("lead telled");
   });
@@ -89,6 +103,7 @@ function JoinAPI(socket, io) {
     game.socketId = socket.id;
 
     game.id = generateId();
+    game.level = 0;
 
     socket.broadcast.emit("player ready", game.nickname);
   });
@@ -98,6 +113,7 @@ function JoinAPI(socket, io) {
     game.socketId = undefined;
 
     game.id = generateId();
+    game.level = 0;
 
     io.emit("player joined");
   });
@@ -105,12 +121,10 @@ function JoinAPI(socket, io) {
 
 function GameAPI(socket, io) {
   socket.on("get game index", () => {
+    const [question, variants] = getQuestions();
+
     socket.emit("set game index", game.id);
-    socket.emit("set game questions", {
-      stage: 1,
-      question,
-      variants: variants.split(";"),
-    });
+    socket.emit("set game questions", getGameData(question, variants));
   });
 
   socket.on("register success", () => {
@@ -120,7 +134,12 @@ function GameAPI(socket, io) {
   socket.on("start game", () => {
     if (!game.id && !game.socketId) return;
 
+    const [question] = getQuestions();
+
     socket.emit("set stage", 2);
+
+    socket.emit("set game level", 1);
+    socket.emit("set game question", question);
 
     io.to(game.socketId).emit("game created", game.id);
   });
@@ -128,7 +147,30 @@ function GameAPI(socket, io) {
   socket.on("choosed question", (id) => {
     game.choosedId = id;
 
-    io.to(lead.id).emit("choosed question");
+    const [_, variants, __] = getQuestions();
+
+    io.to(lead.id).emit("choosed question", variants.split(";")[id]);
+  });
+
+  socket.on("question taken", () => {
+    const [_, variants, result] = getQuestions();
+
+    const takenQuestion = variants.split(";")[game.choosedId];
+
+    if (takenQuestion === result) {
+      game.level++;
+
+      const [question2, variants2] = getQuestions();
+
+      socket.emit("set stage", 2);
+
+      io.emit("set game level", 2);
+      io.emit("set game question", question2);
+
+      io.emit("set game questions", getGameData(question2, variants2));
+    } else {
+      io.emit("game end");
+    }
   });
 }
 
@@ -148,6 +190,7 @@ function Socket(socket, io) {
       game.socketId = undefined;
 
       game.id = generateId();
+      game.level = 0;
 
       socket.broadcast.emit("player unjoined");
     } else if (lead.id === socket.id || game.socketId === socket.id) {
@@ -162,6 +205,7 @@ function Socket(socket, io) {
       game.socketId = undefined;
 
       game.id = generateId();
+      game.level = 0;
     }
   });
 }

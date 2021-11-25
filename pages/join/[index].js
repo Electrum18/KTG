@@ -47,6 +47,12 @@ export default function Join() {
       });
 
       setSocket(socket);
+
+      return () => {
+        socket.disconnect();
+
+        setSocket(null);
+      };
     });
   }, []);
 

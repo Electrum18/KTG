@@ -15,8 +15,6 @@ import useQuestions from "../../helpers/questions";
 export default function Game() {
   const [gameIndex, setGameIndex] = useState();
 
-  const [level, setLevel] = useState(0);
-
   const router = useRouter();
 
   const { index } = router.query;
@@ -48,6 +46,12 @@ export default function Game() {
       socket.on("set game questions", setQuestions);
 
       setSocket(socket);
+
+      return () => {
+        socket.disconnect();
+
+        setSocket(null);
+      };
     });
   }, []);
 

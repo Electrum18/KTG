@@ -46,12 +46,9 @@ function Hand({ selectedId }) {
   );
 }
 
-function Sounds(setAnimationState, setChoosed, socket, id) {
+function Sounds() {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
-    onend: () => {
-      setAnimationState(1);
-    },
   });
 
   const [playPlacePaper] = useSound("/sound/item-placed.mp3", {
@@ -60,17 +57,6 @@ function Sounds(setAnimationState, setChoosed, socket, id) {
 
   const [playChoose] = useSound("/sound/click.mp3", {
     volume: 0.5,
-    onend: () => {
-      console.log(socket, id);
-
-      if (socket && id) {
-        socket.emit("choosed question", id);
-
-        setChoosed(true);
-
-        console.log("choosed");
-      }
-    },
   });
 
   return [playStart, playPlacePaper, playChoose];
@@ -82,37 +68,46 @@ export default function QuestionTablet({ socket }) {
   const [selectedId, setSelectedId] = useState(null);
   const [choosed, setChoosed] = useState(false);
 
-  const [playStart, playPlacePaper, playChoose] = Sounds(
-    setAnimationState,
-    setChoosed,
-    socket,
-    selectedId
-  );
+  const [playStart, playPlacePaper, playChoose] = Sounds();
 
-  const [inStage, inQuestion, inVariants] = useQuestions(
-    (state) => [state.stage, state.question, state.variants],
+  const [inLevel, inStage, inQuestion, inVariants] = useQuestions(
+    (state) => [state.level, state.stage, state.question, state.variants],
     shallow
   );
 
+  const [level, setLevel] = useState(0);
   const [question, setQuestion] = useState();
   const [variants, setVariants] = useState();
 
+  useEffect(() => setLevel(inLevel), [inLevel]);
   useEffect(() => setAnimationState(inStage), [inStage]);
   useEffect(() => setQuestion(inQuestion), [inQuestion]);
-  useEffect(() => setVariants(inVariants), [inVariants]);
+  useEffect(() => {
+    setVariants(inVariants);
+    setChoosed(false);
+  }, [inVariants]);
 
   useEffect(() => {
-    if (animationState == 0 && playStart) playStart();
+    if (animationState == 0 && playStart) {
+      playStart();
+
+      setTimeout(() => setAnimationState(1), 1500);
+    }
   }, [animationState, playStart]);
 
   useEffect(() => {
     switch (animationState) {
-      case 3:
+      case 2:
         playPlacePaper();
-        setAnimationState(2);
         break;
     }
   }, [animationState]);
+
+  useEffect(() => {
+    if (socket && selectedId !== undefined && choosed) {
+      socket.emit("choosed question", selectedId);
+    }
+  }, [socket, choosed, selectedId]);
 
   return (
     <div
@@ -143,8 +138,14 @@ export default function QuestionTablet({ socket }) {
             <button
               key={quote}
               onPointerEnter={() => !choosed && setSelectedId(id)}
-              onClick={() => playChoose()}
-              className={"choose-button borders " + (choosed ? "disabled" : "")}
+              onClick={() => {
+                playChoose();
+                setChoosed(true);
+              }}
+              className={
+                "choose-button borders " +
+                (choosed && id !== selectedId ? "disabled" : "")
+              }
             >
               {quote}
             </button>

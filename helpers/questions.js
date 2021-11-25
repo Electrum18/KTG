@@ -2,14 +2,17 @@ import create from "zustand";
 
 const useQuestions = create((set) => ({
   stage: 0,
+  level: 0,
   question: undefined,
   variants: undefined,
 
-  setQuestions: ({ stage, question, variants }) =>
+  setQuestions: ({ level, stage, question, variants }) =>
     set(() => {
       const output = {};
 
-      if (stage) output.stage = stage;
+      if (level !== undefined) output.level = level;
+      if (stage !== undefined) output.stage = stage;
+
       if (question) output.question = question;
       if (variants) output.variants = variants;
 

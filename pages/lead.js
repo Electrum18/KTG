@@ -21,18 +21,26 @@ const style = {
 
 function LeadPhase({
   phase,
+  socket,
+
   joinIndex,
   joinPhase,
+
+  gameLevel,
+  gameQuestion,
   gameIndex,
   gamePhase,
-  socket,
+  gameChoose,
 }) {
   switch (phase) {
     case 2:
       return (
         <GameControl
+          gameLevel={gameLevel}
+          gameQuestion={gameQuestion}
           gameIndex={gameIndex}
           gamePhase={gamePhase}
+          gameChoose={gameChoose}
           socket={socket}
         />
       );
@@ -60,6 +68,9 @@ export default function Lead() {
 
   const [gameIndex, setGameIndex] = useState();
   const [gamePhase, setGamePhase] = useState(0);
+  const [gameChoose, setGameChoose] = useState("");
+  const [gameLevel, setGameLevel] = useState(0);
+  const [gameQuestion, setQameQuestion] = useState("");
 
   const [socket, setSocket] = useState(null);
 
@@ -81,7 +92,18 @@ export default function Lead() {
       socket.on("set game index", setGameIndex);
 
       socket.on("lead telled", () => setGamePhase(1));
-      socket.on("choosed question", () => setGamePhase(2));
+
+      socket.on("set game level", setGameLevel);
+      socket.on("set game question", (question) => {
+        setQameQuestion(question);
+        setGamePhase(0);
+        setGameChoose("");
+      });
+
+      socket.on("choosed question", (question) => {
+        setGamePhase(2);
+        setGameChoose(question);
+      });
 
       socket.on("set stage", setPhase);
 
@@ -90,6 +112,12 @@ export default function Lead() {
       socket.on("player unjoined", () => setJoinPhase([0, undefined]));
 
       setSocket(socket);
+
+      return () => {
+        socket.disconnect();
+
+        setSocket(null);
+      };
     });
   }, []);
 
@@ -110,8 +138,11 @@ export default function Lead() {
               socket={socket}
               joinIndex={joinIndex}
               joinPhase={joinPhase}
+              gameLevel={gameLevel}
+              gameQuestion={gameQuestion}
               gameIndex={gameIndex}
               gamePhase={gamePhase}
+              gameChoose={gameChoose}
             />
           </div>
 

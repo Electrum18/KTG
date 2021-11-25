@@ -17,14 +17,15 @@ const style = {
     top: "27%",
     transform: "translate(-50%, -50%) rotate(-5deg)",
   },
+  paper3: {
+    width: "fit-content",
+    left: "75%",
+    position: "absolute",
+    top: "30%",
+    transform: "translate(-50%, -50%) rotate(5deg)",
+  },
   text: { transform: "rotate(-5deg)" },
 };
-
-const joinPlayerTextEnum = [
-  "Ждем присоедение игрока",
-  "Игрок еще не готов",
-  "Игрок готов к игре!",
-];
 
 function PaperUpper({ gameIndex }) {
   const [joinLink, setJoinLink] = useState();
@@ -65,6 +66,31 @@ function PaperUpper({ gameIndex }) {
   );
 }
 
+function PaperUpperRight() {
+  return (
+    <div style={style.paper3}>
+      <div
+        className="absolute z-30 w-full h-full flex flex-col p-8 justify-center"
+        style={style.text}
+      >
+        <p className="text-2xl"> Никнейм </p>
+        <p className="text-2xl"> Уровень </p>
+        <p className="text-2xl"> Очки </p>
+      </div>
+
+      <div className="z-20">
+        <Image
+          src="/assets/paper2.png"
+          alt="Оповещение"
+          width={270 * 1.2}
+          height={220 * 0.8}
+          loading="eager"
+        />
+      </div>
+    </div>
+  );
+}
+
 const subtextEnum = [
   "Назовите вопрос и нажмите далее",
   "Ожидайте выбор вопроса игроком",
@@ -73,7 +99,7 @@ const subtextEnum = [
 
 const socketMethodEnum = ["question readed", undefined, "question taken"];
 
-function Paper({ gamePhase, socket }) {
+function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
   const [disabled, setDisabled] = useState();
 
   useEffect(() => {
@@ -87,16 +113,22 @@ function Paper({ gamePhase, socket }) {
         style={style.text}
       >
         <h1 className="text-2xl tracking-widest text-center mt-auto">
-          Вопрос 1
+          Вопрос {gameLevel}
         </h1>
 
         <p className="text-xl tracking-widest text-center my-6">
-          Что такое горилка?
+          {gameQuestion}
         </p>
 
         <div className="text-base text-gray-500 tracking-widest mx-2">
           {gamePhase + 1 + " | " + subtextEnum[gamePhase]}
         </div>
+
+        {gameChoose && (
+          <div className="text-base text-gray-500 tracking-widest mx-2">
+            Ответ: {gameChoose}
+          </div>
+        )}
 
         <div className="w-full flex flex-col">
           <button
@@ -131,11 +163,27 @@ function Paper({ gamePhase, socket }) {
   );
 }
 
-export default function GameControl({ gameIndex, gamePhase, socket }) {
+export default function GameControl({
+  gameLevel,
+  gameQuestion,
+  gameIndex,
+  gamePhase,
+  gameChoose,
+  socket,
+}) {
   return (
     <>
-      <Paper gamePhase={gamePhase} socket={socket} />
+      <Paper
+        gameLevel={gameLevel}
+        gameQuestion={gameQuestion}
+        gamePhase={gamePhase}
+        gameChoose={gameChoose}
+        socket={socket}
+      />
+
       <PaperUpper gameIndex={gameIndex} />
+
+      <PaperUpperRight />
     </>
   );
 }

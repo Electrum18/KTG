@@ -118,6 +118,7 @@ html {
 .lighting {
   background: url("/assets/lighting.png") center/cover;
   mix-blend-mode: multiply;
+  opacity: 0.7;
   @apply pointer-events-none;
 }
 

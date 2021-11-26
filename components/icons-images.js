@@ -10,6 +10,11 @@ export default function IconsImages({ players }) {
         </div>
 
         <div className="z-0 pointer-events-none">
+          <img
+            className="absolute w-full p-2"
+            src={players.avatars && players.avatars.player}
+          />
+
           <Image
             src="/assets/icon-frame.png"
             alt="Аватар игрока"
@@ -27,6 +32,11 @@ export default function IconsImages({ players }) {
         </div>
 
         <div className="z-0 pointer-events-none">
+          <img
+            className="absolute w-full p-2"
+            src={players.avatars && players.avatars.lead}
+          />
+
           <Image
             src="/assets/icon-frame.png"
             alt="Аватар ведущего"

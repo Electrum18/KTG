@@ -81,7 +81,7 @@ function PaperUpperRight({ userInfo }) {
         style={style.text}
       >
         <p className="text-2xl"> Никнейм: {userInfo.nickname} </p>
-        <p className="text-2xl"> Уровень: {userInfo.level} </p>
+        <p className="text-2xl"> Уровень: {userInfo.level + 1} </p>
         <p className="text-2xl">
           Очки: {prices[prices.length - 1 - userInfo.level]}
         </p>

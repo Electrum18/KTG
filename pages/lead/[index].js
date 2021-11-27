@@ -6,12 +6,12 @@ import { useEffect, useState } from "react";
 
 import io from "socket.io-client";
 
-import Background from "../components/background";
-import Light from "../components/lighting";
+import Background from "../../components/background";
+import Light from "../../components/lighting";
 
-import CreateGame from "../components/lead-phases/create";
-import JoinGamePhase from "../components/lead-phases/join-player";
-import GameControl from "../components/lead-phases/game-control";
+import CreateGame from "../../components/lead-phases/create";
+import JoinGamePhase from "../../components/lead-phases/join-player";
+import GameControl from "../../components/lead-phases/game-control";
 
 const style = {
   corckboard: {
@@ -34,6 +34,8 @@ function LeadPhase({
   gameChoose,
 
   userInfo,
+
+  viewIndex,
 }) {
   switch (phase) {
     case 2:
@@ -46,6 +48,7 @@ function LeadPhase({
           gameChoose={gameChoose}
           socket={socket}
           userInfo={userInfo}
+          viewIndex={viewIndex}
         />
       );
 
@@ -76,26 +79,38 @@ export default function Lead() {
   const [gameLevel, setGameLevel] = useState(0);
   const [gameQuestion, setQameQuestion] = useState("");
 
+  const [viewIndex, setViewIndex] = useState();
+
   const [userInfo, setUserInfo] = useState({});
 
   const [socket, setSocket] = useState(null);
 
+  const [leadIndex, setLeadIndex] = useState();
+
   const router = useRouter();
+
+  const { index } = router.query;
+
+  useEffect(() => {
+    if (index && leadIndex && index !== leadIndex) router.push("/");
+  }, [index, leadIndex, socket]);
 
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
 
       socket.on("connect", () => {
-        socket.emit("get lead exist");
+        socket.emit("get lead index");
       });
 
-      socket.on("is lead exist", (exist) => exist && router.push("/"));
+      socket.on("set lead index", setLeadIndex);
+
       socket.on("lead joined", () => router.push("/"));
       socket.on("leave", () => location.reload());
 
       socket.on("set join index", setJoinIndex);
       socket.on("set game index", setGameIndex);
+      socket.on("set view index", setViewIndex);
 
       socket.on("lead telled", () => setGamePhase(1));
 
@@ -113,9 +128,14 @@ export default function Lead() {
 
       socket.on("set stage", setPhase);
 
-      socket.on("player ready", (nickname) => setJoinPhase([2, nickname]));
-      socket.on("player joined", () => setJoinPhase([1, undefined]));
-      socket.on("player unjoined", () => setJoinPhase([0, undefined]));
+      socket.on("player ready", (nickname, avatar) =>
+        setJoinPhase([2, nickname, avatar])
+      );
+
+      socket.on("player joined", () => setJoinPhase([1, undefined, undefined]));
+      socket.on("player unjoined", () =>
+        setJoinPhase([0, undefined, undefined])
+      );
 
       socket.on("get player data", setUserInfo);
 
@@ -156,6 +176,7 @@ export default function Lead() {
               gamePhase={gamePhase}
               gameChoose={gameChoose}
               userInfo={userInfo}
+              viewIndex={viewIndex}
             />
           </div>
 

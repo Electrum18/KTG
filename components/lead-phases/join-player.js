@@ -19,6 +19,13 @@ const style = {
     top: "27%",
     transform: "translate(-50%, -50%) rotate(-5deg)",
   },
+  paper3: {
+    width: "fit-content",
+    right: "-5%",
+    position: "absolute",
+    top: "27%",
+    transform: "translate(-50%, -50%) rotate(5deg)",
+  },
   text: { transform: "rotate(-5deg)" },
 };
 
@@ -27,6 +34,31 @@ const joinPlayerTextEnum = [
   "Игрок еще не готов",
   "Игрок готов к игре!",
 ];
+
+function Avatar({ joinPhase }) {
+  return (
+    <div style={style.paper3}>
+      <div className="absolute z-10 w-full h-full flex flex-col justify-end pb-2">
+        {joinPhase[1] && <p className="mx-6 text-xl">{joinPhase[1]}</p>}
+        <p className="mx-6 -mt-2 text-right text-lg">игрок</p>
+      </div>
+
+      <div className="z-0 pointer-events-none">
+        {joinPhase[2] && (
+          <img className="absolute w-full p-2" src={joinPhase[2]} />
+        )}
+
+        <Image
+          src="/assets/icon-frame.png"
+          alt="Аватар игрока"
+          width={400 * 0.5}
+          height={480 * 0.5}
+          loading="eager"
+        />
+      </div>
+    </div>
+  );
+}
 
 function PaperUpper({ joinIndex }) {
   const [joinLink, setJoinLink] = useState();
@@ -144,6 +176,7 @@ export default function JoinGamePhase({ joinIndex, joinPhase, socket }) {
     <>
       <Paper joinPhase={joinPhase} socket={socket} />
       <PaperUpper joinIndex={joinIndex} />
+      <Avatar joinPhase={joinPhase} />
     </>
   );
 }

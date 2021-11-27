@@ -22,10 +22,15 @@ export const config = {
 const generateId = () => Math.random().toString(36).substring(2);
 
 const lead = {
-  id: undefined,
+  id: generateId(),
+  socketId: undefined,
   nickname: undefined,
   avatar: undefined,
 };
+
+console.log(
+  `\n----- АДРЕС ДОСТУПА К ПАНЕЛИ ВЕДУЩЕГО: /lead/${lead.id} -----\n`
+);
 
 const join = {
   id: generateId(),
@@ -37,8 +42,11 @@ const game = {
   socketId: undefined,
   nickname: undefined,
   avatar: undefined,
+  level: 0,
+  stage: 0,
   choosedId: undefined,
-  level: 13,
+  choosedVariant: null,
+  viewId: undefined,
 };
 
 function getQuestions() {
@@ -59,8 +67,8 @@ function getGameData(question, variants) {
 }
 
 function LeadAPI(socket, io) {
-  socket.on("get lead exist", () => {
-    socket.emit("is lead exist", lead.id && lead.nickname);
+  socket.on("get lead index", () => {
+    socket.emit("set lead index", lead.id);
   });
 
   socket.on("login lead", (data) => {
@@ -69,12 +77,12 @@ function LeadAPI(socket, io) {
       data.questions &&
       data.avatar &&
       !lead.nickname &&
-      !lead.id
+      !lead.socketId
     )
       return;
 
     lead.nickname = data.nickname;
-    lead.id = socket.id;
+    lead.socketId = socket.id;
     lead.avatar = data.avatar;
 
     parsedQuestions = parseQuestions(data.questions);
@@ -88,7 +96,7 @@ function LeadAPI(socket, io) {
   });
 
   socket.on("question readed", () => {
-    io.to(game.socketId).emit("set game phase", { stage: 2 });
+    io.emit("set game phase", { stage: 2 });
 
     socket.emit("lead telled");
   });
@@ -116,10 +124,10 @@ function JoinAPI(socket, io) {
     game.socketId = socket.id;
     game.avatar = data.avatar;
 
-    game.id = generateId();
+    game.viewId = game.id = generateId();
     game.level = 0;
 
-    socket.broadcast.emit("player ready", game.nickname);
+    socket.broadcast.emit("player ready", game.nickname, game.avatar);
   });
 
   socket.on("player changing", () => {
@@ -141,6 +149,36 @@ function GameAPI(socket, io) {
 
     socket.emit("set game index", game.id);
     socket.emit("set game questions", getGameData(question, variants));
+
+    socket.to(lead.socketId).emit("set view index", game.viewId);
+
+    socket.emit("get game players", {
+      lead: lead.nickname,
+      player: game.nickname,
+      avatars: {
+        lead: lead.avatar,
+        player: game.avatar,
+      },
+    });
+  });
+
+  socket.on("get stage", (stage) => {
+    game.stage = stage;
+  });
+
+  socket.on("get view index", () => {
+    const [question, variants] = getQuestions();
+
+    socket.emit("set game index", game.viewId);
+    socket.emit("set game questions", getGameData(question, variants));
+
+    socket.emit("set game phase", { stage: game.stage });
+
+    socket.emit("variant pointed", game.choosedVariant);
+    socket.emit(
+      "choosed question",
+      game.choosedVariant && variants.split(";").indexOf(game.choosedVariant)
+    );
 
     socket.emit("get game players", {
       lead: lead.nickname,
@@ -175,7 +213,7 @@ function GameAPI(socket, io) {
 
     const [_, variants, __] = getQuestions();
 
-    io.to(lead.id).emit("choosed question", variants.split(";")[id]);
+    socket.broadcast.emit("choosed question", variants.split(";")[id]);
   });
 
   socket.on("question taken", () => {
@@ -195,14 +233,16 @@ function GameAPI(socket, io) {
 
         const [question2, variants2] = getQuestions();
 
-        socket.emit("set stage", 2);
+        io.emit("set stage", 2);
+
+        game.phase = 2;
 
         io.emit("set game level", 2);
         io.emit("set game question", question2);
 
         io.emit("set game questions", getGameData(question2, variants2));
 
-        socket.emit("get player data", {
+        io.emit("get player data", {
           nickname: game.nickname,
           level: game.level,
         });
@@ -212,6 +252,18 @@ function GameAPI(socket, io) {
     } else {
       endGame();
     }
+  });
+
+  socket.on("phase setted", (phase) => {
+    game.phase = phase;
+
+    socket.broadcast.emit("phase setted", phase);
+  });
+
+  socket.on("variant pointed", (variant) => {
+    game.choosedVariant = variant;
+
+    socket.broadcast.emit("variant pointed", variant);
   });
 }
 
@@ -231,7 +283,7 @@ function Socket(socket, io) {
     } else if (game.socketId === socket.id) {
       io.emit("leave");
 
-      lead.id = undefined;
+      lead.socketId = undefined;
       lead.nickname = undefined;
       lead.avatar = undefined;
 
@@ -243,12 +295,12 @@ function Socket(socket, io) {
 
       parsedQuestions = undefined;
 
-      game.id = generateId();
+      game.viewId = game.id = generateId();
       game.level = 0;
-    } else if (lead.id === socket.id) {
+    } else if (lead.socketId === socket.id) {
       io.emit("leave");
 
-      lead.id = undefined;
+      lead.socketId = undefined;
       lead.nickname = undefined;
       lead.avatar = undefined;
 
@@ -260,7 +312,7 @@ function Socket(socket, io) {
 
       parsedQuestions = undefined;
 
-      game.id = generateId();
+      game.viewId = game.id = generateId();
       game.level = 0;
     }
   });

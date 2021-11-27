@@ -7,9 +7,9 @@ import io from "socket.io-client";
 
 import Background from "../../components/background";
 import Light from "../../components/lighting";
-import QuestionTablet from "../../components/tablets/question";
 import NotepadScore from "../../components/notepad-score";
 import IconsImages from "../../components/icons-images";
+import QuestionViewerTablet from "../../components/tablets/question-viewer";
 
 import useQuestions from "../../helpers/questions";
 
@@ -29,12 +29,15 @@ export default function Game() {
 
   const setQuestions = useQuestions((state) => state.setQuestions);
 
+  const [selectedId, setSelectedId] = useState(null);
+  const [choosedQuestion, setChoosedQuestion] = useState(null);
+
   useEffect(() => {
     fetch("/api/socketio").finally(() => {
       const socket = io();
 
       socket.on("connect", () => {
-        socket.emit("get game index");
+        socket.emit("get view index");
       });
 
       socket.on("leave", () => location.reload());
@@ -46,8 +49,11 @@ export default function Game() {
       socket.on("get game players", setPlayers);
 
       socket.on("game ended", (score) => {
-        router.push(`/result?score=${score}`);
+        router.push(`/result?score=${score}&player=lead`);
       });
+
+      socket.on("variant pointed", setSelectedId);
+      socket.on("choosed question", setChoosedQuestion);
 
       setSocket(socket);
 
@@ -70,7 +76,12 @@ export default function Game() {
         <Background />
         <IconsImages players={players} />
         <NotepadScore />
-        <QuestionTablet socket={socket} />
+        <QuestionViewerTablet
+          selectedId={selectedId}
+          choosedQuestion={choosedQuestion}
+          setChoosedQuestion={setChoosedQuestion}
+          socket={socket}
+        />
       </main>
 
       <Light />

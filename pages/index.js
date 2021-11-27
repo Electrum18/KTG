@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Image from "next/image";
 
+import { useEffect } from "react";
+
 import Background from "../components/background";
 import Light from "../components/lighting";
 
@@ -76,6 +78,10 @@ function Note() {
 }
 
 export default function Home() {
+  useEffect(() => {
+    fetch("/api/socketio");
+  });
+
   return (
     <>
       <Head>

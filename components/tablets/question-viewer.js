@@ -62,11 +62,13 @@ function Sounds() {
   return [playStart, playPlacePaper, playChoose];
 }
 
-export default function QuestionTablet({ socket }) {
+export default function QuestionViewerTablet({
+  selectedId,
+  choosedQuestion,
+  setChoosedQuestion,
+  socket,
+}) {
   const [animationState, setAnimationState] = useState(0);
-
-  const [selectedId, setSelectedId] = useState(null);
-  const [choosed, setChoosed] = useState(false);
 
   const [playStart, playPlacePaper, playChoose] = Sounds();
 
@@ -84,7 +86,7 @@ export default function QuestionTablet({ socket }) {
   useEffect(() => setQuestion(inQuestion), [inQuestion]);
   useEffect(() => {
     setVariants(inVariants);
-    setChoosed(false);
+    setChoosedQuestion(false);
   }, [inVariants]);
 
   useEffect(() => {
@@ -100,26 +102,12 @@ export default function QuestionTablet({ socket }) {
   }, [animationState, playStart]);
 
   useEffect(() => {
-    if (socket) {
-      socket.emit("get stage", animationState);
-
-      switch (animationState) {
-        case 2:
-          playPlacePaper();
-          break;
-      }
+    switch (animationState) {
+      case 2:
+        playPlacePaper();
+        break;
     }
-  }, [socket, animationState]);
-
-  useEffect(() => {
-    if (socket && selectedId !== undefined && choosed) {
-      socket.emit("choosed question", selectedId);
-    }
-  }, [socket, choosed, selectedId]);
-
-  useEffect(() => {
-    socket && socket.emit("variant pointed", selectedId);
-  }, [socket, selectedId]);
+  }, [animationState]);
 
   return (
     <div
@@ -127,10 +115,7 @@ export default function QuestionTablet({ socket }) {
       className={"absolute bottom-0 mx-auto transition-all duration-500"}
       style={tabletStyles[animationState]}
     >
-      <div
-        onPointerLeave={() => !choosed && setSelectedId(null)}
-        className="absolute z-10 w-full h-full pt-48"
-      >
+      <div className="absolute z-10 w-full h-full pt-48">
         <h2
           className={
             ((question || "").length < 32 ? "text-4xl" : "text-2xl") +
@@ -149,14 +134,9 @@ export default function QuestionTablet({ socket }) {
           {(variants || []).map((quote, id) => (
             <button
               key={quote}
-              onPointerEnter={() => !choosed && setSelectedId(id)}
-              onClick={() => {
-                playChoose();
-                setChoosed(true);
-              }}
               className={
                 "choose-button borders " +
-                (choosed && id !== selectedId ? "disabled" : "")
+                (choosedQuestion && choosedQuestion === quote ? "" : "disabled")
               }
             >
               {quote}
@@ -164,7 +144,9 @@ export default function QuestionTablet({ socket }) {
           ))}
         </div>
 
-        {animationState > 1 && !choosed && <Hand selectedId={selectedId} />}
+        {animationState > 1 && !choosedQuestion && (
+          <Hand selectedId={selectedId} />
+        )}
       </div>
 
       <div className="z-0 pointer-events-none">

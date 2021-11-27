@@ -34,12 +34,12 @@ const prices = [
   2_000, 1_000, 500, 300, 200, 100, 0,
 ];
 
-function PaperUpper({ gameIndex }) {
+function PaperUpper({ viewIndex }) {
   const [joinLink, setJoinLink] = useState();
 
   useEffect(() => {
-    setJoinLink(location.origin + "/view/" + gameIndex);
-  }, [gameIndex]);
+    setJoinLink(location.origin + "/view/" + viewIndex);
+  }, [viewIndex]);
 
   return (
     <div style={style.paper2}>
@@ -54,7 +54,7 @@ function PaperUpper({ gameIndex }) {
           placeholder="Введите ваш логин"
           className="border-2 border-gray-800 borders bg-gray-100 p-2 my-2"
           onChange={() =>
-            gameIndex && setJoinLink(location.origin + "/view/" + gameIndex)
+            viewIndex && setJoinLink(location.origin + "/view/" + viewIndex)
           }
           value={joinLink}
         />
@@ -197,6 +197,7 @@ export default function GameControl({
   gameChoose,
   socket,
   userInfo,
+  viewIndex,
 }) {
   return (
     <>
@@ -208,7 +209,7 @@ export default function GameControl({
         socket={socket}
       />
 
-      <PaperUpper gameIndex={gameIndex} />
+      <PaperUpper viewIndex={viewIndex} />
 
       <PaperUpperRight userInfo={userInfo} />
     </>

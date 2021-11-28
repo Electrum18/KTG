@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
@@ -8,6 +7,7 @@ import useSound from "use-sound";
 
 import Background from "../components/background";
 import Light from "../components/lighting";
+import Metadata from "../components/metadata";
 
 const style = {
   corckboard: {
@@ -110,10 +110,7 @@ function Paper() {
 export default function Result() {
   return (
     <>
-      <Head>
-        <title>Результат игры | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="result" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />

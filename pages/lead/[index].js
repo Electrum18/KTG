@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
@@ -12,6 +11,7 @@ import Light from "../../components/lighting";
 import CreateGame from "../../components/lead-phases/create";
 import JoinGamePhase from "../../components/lead-phases/join-player";
 import GameControl from "../../components/lead-phases/game-control";
+import Metadata from "../../components/metadata";
 
 const style = {
   corckboard: {
@@ -36,6 +36,8 @@ function LeadPhase({
   userInfo,
 
   viewIndex,
+  needsHelp,
+  voting,
 }) {
   switch (phase) {
     case 2:
@@ -49,6 +51,8 @@ function LeadPhase({
           socket={socket}
           userInfo={userInfo}
           viewIndex={viewIndex}
+          needsHelp={needsHelp}
+          voting={voting}
         />
       );
 
@@ -74,18 +78,20 @@ export default function Lead() {
   const [joinPhase, setJoinPhase] = useState([0, undefined]);
 
   const [gameIndex, setGameIndex] = useState();
+  const [viewIndex, setViewIndex] = useState();
+  const [leadIndex, setLeadIndex] = useState();
+
   const [gamePhase, setGamePhase] = useState(0);
   const [gameChoose, setGameChoose] = useState("");
   const [gameLevel, setGameLevel] = useState(0);
   const [gameQuestion, setQameQuestion] = useState("");
 
-  const [viewIndex, setViewIndex] = useState();
+  const [needsHelp, setNeedsHelp] = useState();
 
   const [userInfo, setUserInfo] = useState({});
+  const [voting, setVoting] = useState(false);
 
   const [socket, setSocket] = useState(null);
-
-  const [leadIndex, setLeadIndex] = useState();
 
   const router = useRouter();
 
@@ -119,6 +125,7 @@ export default function Lead() {
         setQameQuestion(question);
         setGamePhase(0);
         setGameChoose("");
+        setNeedsHelp(false);
       });
 
       socket.on("choosed question", (question) => {
@@ -143,6 +150,11 @@ export default function Lead() {
         router.push(`/result?score=${score}&player=lead`);
       });
 
+      socket.on("player needs help", () => setNeedsHelp(true));
+
+      socket.on("player help by viewers", () => setVoting(true));
+      socket.on("player help by viewers stop", () => setVoting(false));
+
       setSocket(socket);
 
       return () => {
@@ -155,10 +167,7 @@ export default function Lead() {
 
   return (
     <>
-      <Head>
-        <title>Панель ведущего | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="lead" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
@@ -177,6 +186,8 @@ export default function Lead() {
               gameChoose={gameChoose}
               userInfo={userInfo}
               viewIndex={viewIndex}
+              needsHelp={needsHelp}
+              voting={voting}
             />
           </div>
 

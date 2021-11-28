@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import Head from "next/head";
 import { useRouter } from "next/router";
 
 import io from "socket.io-client";
@@ -10,6 +9,7 @@ import Light from "../../components/lighting";
 import QuestionTablet from "../../components/tablets/question";
 import NotepadScore from "../../components/notepad-score";
 import IconsImages from "../../components/icons-images";
+import Metadata from "../../components/metadata";
 
 import useQuestions from "../../helpers/questions";
 
@@ -22,6 +22,11 @@ export default function Game() {
 
   const [socket, setSocket] = useState(null);
   const [players, setPlayers] = useState({});
+
+  const [exludedVariants, setExludedVariants] = useState({});
+
+  const [voting, setVoting] = useState(false);
+  const [votes, setVotes] = useState([0, 0, 0, 0]);
 
   useEffect(() => {
     if (index && gameIndex && index !== gameIndex) router.push("/");
@@ -41,13 +46,24 @@ export default function Game() {
 
       socket.on("set game index", setGameIndex);
       socket.on("set game phase", setQuestions);
-      socket.on("set game questions", setQuestions);
+      socket.on("set game questions", (val) => {
+        setQuestions(val);
+        setExludedVariants({});
+      });
 
+      socket.on("get game helpers", setQuestions);
       socket.on("get game players", setPlayers);
+
+      socket.on("exclude variants", setExludedVariants);
 
       socket.on("game ended", (score) => {
         router.push(`/result?score=${score}`);
       });
+
+      socket.on("player help by viewers", () => setVoting(true));
+      socket.on("player help by viewers stop", () => setVoting(false));
+
+      socket.on("get game voting", setVotes);
 
       setSocket(socket);
 
@@ -61,16 +77,18 @@ export default function Game() {
 
   return (
     <>
-      <Head>
-        <title>Страница игры | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="game" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
         <IconsImages players={players} />
         <NotepadScore />
-        <QuestionTablet socket={socket} />
+        <QuestionTablet
+          exludedVariants={exludedVariants}
+          voting={voting}
+          votes={votes}
+          socket={socket}
+        />
       </main>
 
       <Light />

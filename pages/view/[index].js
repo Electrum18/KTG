@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import Head from "next/head";
 import { useRouter } from "next/router";
 
 import io from "socket.io-client";
@@ -12,6 +11,7 @@ import IconsImages from "../../components/icons-images";
 import QuestionViewerTablet from "../../components/tablets/question-viewer";
 
 import useQuestions from "../../helpers/questions";
+import Metadata from "../../configs/metadata";
 
 export default function Game() {
   const [gameIndex, setGameIndex] = useState();
@@ -22,6 +22,9 @@ export default function Game() {
 
   const [socket, setSocket] = useState(null);
   const [players, setPlayers] = useState({});
+
+  const [voting, setVoting] = useState(false);
+  const [votes, setVotes] = useState([0, 0, 0, 0]);
 
   useEffect(() => {
     if (index && gameIndex && index !== gameIndex) router.push("/");
@@ -46,6 +49,7 @@ export default function Game() {
       socket.on("set game phase", setQuestions);
       socket.on("set game questions", setQuestions);
 
+      socket.on("get game helpers", setQuestions);
       socket.on("get game players", setPlayers);
 
       socket.on("game ended", (score) => {
@@ -54,6 +58,11 @@ export default function Game() {
 
       socket.on("variant pointed", setSelectedId);
       socket.on("choosed question", setChoosedQuestion);
+
+      socket.on("player help by viewers", () => setVoting(true));
+      socket.on("player help by viewers stop", () => setVoting(false));
+
+      socket.on("get game voting", setVotes);
 
       setSocket(socket);
 
@@ -67,10 +76,7 @@ export default function Game() {
 
   return (
     <>
-      <Head>
-        <title>Страница игры | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="view" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />
@@ -81,6 +87,8 @@ export default function Game() {
           choosedQuestion={choosedQuestion}
           setChoosedQuestion={setChoosedQuestion}
           socket={socket}
+          voting={voting}
+          votes={votes}
         />
       </main>
 

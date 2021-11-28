@@ -1,29 +1,131 @@
-# Next.js + Tailwind CSS Example
+# Кто хочет стать геймером? (КТГ)
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v2.2)](https://blog.tailwindcss.com/tailwindcss-2-2) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+Браузерная онлайн игра для стриминговых платформ по мотиву "Кто хочет стать миллионером?" в стиле фотошоп флеш игр 2012 года по запросу учителя.
 
-It uses the new [`Just-in-Time Mode`](https://tailwindcss.com/docs/just-in-time-mode) for Tailwind CSS.
+Является шуточным ремейком, где участвуют зрители, игрок и ведущий на специальных страницах с ответом на вопросы выбранные ведущим.
 
-## Preview
+## Навигация
 
-Preview the example live on [StackBlitz](http://stackblitz.com/):
+- [Установка и запуск](#установка-и-запуск)
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+  - [Необходимые программы](#необходимые-программы)
+  - [Установка проекта](#установка-проекта)
+  - [Запуск проекта](#запуск-проекта)
 
-## Deploy your own
+- [Использование сайта](#использование-сайта)
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
+  - [Этапы запуска игры](#этапы-запуска-игры)
+  - [Процесс игры](#процесс-игры)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+- [Известные проблемы игры](#известные-проблемы-игры)
+- [Лицензия / License](#лицензия-/-license)
 
-## How to use
+## Установка и запуск
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+Для запуска сайта необходим рабочий сервер Next.js в режиме "Start" с установленным Node.js.
+
+### Необходимые программы
+
+- [Node.js 14.x.x](https://nodejs.org/ru/) или выше
+- NPM 7.x.x или выше (устанавливается с Node.js)
+
+Проверьте установленные программы с помощью любой консоли:
 
 ```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-# or
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
+> node -v
+v14.x.x
+
+> npm -v
+7.x.x
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+### Установка проекта
+
+После установки Node.js и NPM скачайте из GitHub и перейдите в папку проекта.
+
+Затем выполните данные команды:
+
+```bash
+> cd ./KTG/
+
+/KTG/> npm i
+```
+
+### Запуск проекта
+
+Необходимо запустить команды в консоли зависимо от ситуации (если запуск первый раз или нету папки `.next`, то запустите `npm run build`) и дождитесь компиляции.
+
+Для запуска в любой ситуации выполняйте команду `npm run start`
+
+**_Убедитесь что вы выполняете команды в папке проекта!_**
+
+```bash
+/KTG/> npm run build # Запуск в первый раз
+
+# логи компиляции...
+
+/KTG/> npm run build # В любом запуске
+
+# логи статического сервера и api...
+```
+
+После запуска `npm run build` зайдите в корневой адрес запущенного сайта `/`, для настройки адресов возможно необходим обратный прокси например через **nginx**.
+
+**_После перехода в первый раз вам выведется консоле адрес панели ведущего_**
+
+```bash
+/KTG/>
+# логи статического сервера и api...
+
+----- АДРЕС ДОСТУПА К ПАНЕЛИ ВЕДУЩЕГО: /lead/XXXXXXXXXX -----
+
+```
+
+Перейдите по предоставленной ссылке через ваш домен `/lead/XXXXXXXXXX`
+
+## Использование сайта
+
+Использование проекта происходит по определенным адресам для определенных участников
+
+- `/` - для всех участников при ожидании
+
+- `/result?score=X` - для всех участников при ожидании
+
+- `/lead/XXXXXXXXXX` - панель ведущего во всем промежутке игры
+
+- `/join/XXXXXXXXXX` - адрес приглашения игрока в игру (`после запуска игры выкидает из адреса`) (есть проблема [сброс аккаунтов](#известные-проблемы-игры))
+
+- `/game/XXXXXXXXXX` - адрес игрока (`после входа второго клиента заканчивает игру`)
+
+- `/view/XXXXXXXXXX` - адрес просмотра игры и голосования (`можно заходить любому количеству клиентов`) (есть проблема [несоотвествие таймера голосования](#известные-проблемы-игры))
+
+### Этапы запуска игры
+
+1. При первом входе получите адрес панели ведущего через первый вход в корневой адрес `/`
+2. Затем перейдите на адрес `/lead/XXXXXXXXXX` и зарегистрируйте аккаунт ведущего на данную игру
+3. Скопируйте и передайте ссылку `/join/XXXXXXXXXX` для кандидата в игрока
+4. Ожидайте регистрации игрока и затем нажмите `далее`, не торопитесь, игрок может поменять аккаунт
+5. Скопируйте и передайте ссылку `/view/XXXXXXXXXX` для желающих зрителей и для собственного просмотра (`стримить данный адрес!`), через данный адрес так же происходит голосование
+
+### Процесс игры
+
+- Этап 1. Опишите вопрос для участника и нажмите `далее`
+- Этап 2. Дождитесь ответа игрока
+  - Вам будет выслано звуковое оповещение если игрок запросет помощь
+  - Так же после выбора вопроса будет звуковое оповещение
+- Этап 3. После выбора вопроса система сама перейдет на следующих или сразу на страницу итогов `/result?score=X`
+
+После окончания игры требуется повторное создание игры (`перезапуск сервера не требуется`).
+
+## Известные проблемы игры
+
+- После захода игрока по адресу `/join/XXXXXXXXXX` возможен сброс аккаунта ведущего
+- Таймер голосования при заходе не с начала голосования отсчитывает с старта времени голосования
+- Сервер может иметь непредвиденные действия в API
+- Ошибки проигрования звуков
+
+## Лицензия / License
+
+Данный репозиторий сделан под лицензией MIT
+
+This repository is licensed under the MIT license

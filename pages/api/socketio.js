@@ -26,11 +26,8 @@ const lead = {
   socketId: undefined,
   nickname: undefined,
   avatar: undefined,
+  noticed: false,
 };
-
-console.log(
-  `\n----- АДРЕС ДОСТУПА К ПАНЕЛИ ВЕДУЩЕГО: /lead/${lead.id} -----\n`
-);
 
 const join = {
   id: generateId(),
@@ -44,9 +41,19 @@ const game = {
   avatar: undefined,
   level: 0,
   stage: 0,
+  phase: 0,
   choosedId: undefined,
   choosedVariant: null,
   viewId: undefined,
+
+  helpers: {
+    percent50: true,
+    helpByLead: true,
+    helpByViewers: true,
+  },
+
+  timer: undefined,
+  voting: [0, 0, 0, 0],
 };
 
 function getQuestions() {
@@ -152,6 +159,7 @@ function GameAPI(socket, io) {
 
     socket.to(lead.socketId).emit("set view index", game.viewId);
 
+    socket.emit("get game helpers", { helpers: game.helpers });
     socket.emit("get game players", {
       lead: lead.nickname,
       player: game.nickname,
@@ -160,6 +168,8 @@ function GameAPI(socket, io) {
         player: game.avatar,
       },
     });
+
+    socket.emit("get game voting", game.voting);
   });
 
   socket.on("get stage", (stage) => {
@@ -180,6 +190,7 @@ function GameAPI(socket, io) {
       game.choosedVariant && variants.split(";").indexOf(game.choosedVariant)
     );
 
+    socket.emit("get game helpers", { helpers: game.helpers });
     socket.emit("get game players", {
       lead: lead.nickname,
       player: game.nickname,
@@ -188,6 +199,10 @@ function GameAPI(socket, io) {
         player: game.avatar,
       },
     });
+
+    socket.emit("get game voting", game.voting);
+
+    if (game.timer) socket.emit("player help by viewers");
   });
 
   socket.on("start game", () => {
@@ -213,6 +228,13 @@ function GameAPI(socket, io) {
 
     const [_, variants, __] = getQuestions();
 
+    if (game.timer) {
+      clearInterval(game.timer);
+      game.timer = undefined;
+
+      io.emit("player help by viewers stop");
+    }
+
     socket.broadcast.emit("choosed question", variants.split(";")[id]);
   });
 
@@ -221,6 +243,13 @@ function GameAPI(socket, io) {
       socket.broadcast.emit("game ended", game.level);
 
       setTimeout(() => socket.emit("game ended", game.level), 1e3);
+    }
+
+    if (game.timer) {
+      clearInterval(game.timer);
+      game.timer = undefined;
+
+      io.emit("player help by viewers stop");
     }
 
     if (game.level < 15) {
@@ -237,15 +266,28 @@ function GameAPI(socket, io) {
 
         game.phase = 2;
 
+        if (game.level === 4 || game.level === 9) {
+          game.helpers = {
+            percent50: true,
+            helpByLead: true,
+            helpByViewers: true,
+          };
+        }
+
+        game.voting = [0, 0, 0, 0];
+
         io.emit("set game level", 2);
         io.emit("set game question", question2);
 
+        io.emit("get game helpers", { helpers: game.helpers });
         io.emit("set game questions", getGameData(question2, variants2));
 
         io.emit("get player data", {
           nickname: game.nickname,
           level: game.level,
         });
+
+        io.emit("get game voting", game.voting);
       } else {
         endGame();
       }
@@ -265,6 +307,54 @@ function GameAPI(socket, io) {
 
     socket.broadcast.emit("variant pointed", variant);
   });
+
+  socket.on("help 50 percent", () => {
+    const [_, variants_, result] = getQuestions();
+
+    const variants = variants_.split(";");
+    const rightId = variants.indexOf(result);
+
+    function getRandom(exclude = undefined) {
+      const variant = Math.floor(Math.random() * variants.length);
+
+      return variant === rightId || variant === exclude
+        ? getRandom(exclude)
+        : variant;
+    }
+
+    const exclude1 = getRandom();
+    const exclude2 = getRandom(exclude1);
+
+    game.helpers.percent50 = false;
+
+    io.emit("get game helpers", { helpers: game.helpers });
+    socket.emit("exclude variants", { [exclude1]: true, [exclude2]: true });
+  });
+
+  socket.on("help by lead", () => {
+    game.helpers.helpByLead = false;
+
+    io.emit("get game helpers", { helpers: game.helpers });
+    io.to(lead.socketId).emit("player needs help");
+  });
+
+  socket.on("help by viewers", () => {
+    game.helpers.helpByViewers = false;
+
+    io.emit("get game helpers", { helpers: game.helpers });
+    io.emit("player help by viewers");
+
+    game.timer = setTimeout(() => {
+      io.emit("player help by viewers stop");
+      game.timer = undefined;
+    }, 60e3);
+  });
+
+  socket.on("vote", (id) => {
+    game.voting[id]++;
+
+    io.emit("get game voting", game.voting);
+  });
 }
 
 function Socket(socket, io) {
@@ -274,6 +364,16 @@ function Socket(socket, io) {
   LeadAPI(socket, io);
   JoinAPI(socket, io);
   GameAPI(socket, io);
+
+  socket.on("get lead notice", () => {
+    if (lead.noticed) return;
+
+    console.log(
+      `\n----- АДРЕС ДОСТУПА К ПАНЕЛИ ВЕДУЩЕГО: /lead/${lead.id} -----\n`
+    );
+
+    lead.noticed = true;
+  });
 
   socket.on("disconnect", () => {
     if (join.socketId === socket.id) {
@@ -293,6 +393,19 @@ function Socket(socket, io) {
       game.socketId = undefined;
       game.avatar = undefined;
 
+      game.helpers = {
+        percent50: true,
+        helpByLead: true,
+        helpByViewers: true,
+      };
+
+      game.voting = [0, 0, 0, 0];
+
+      if (game.timer) {
+        clearInterval(game.timer);
+        game.timer = undefined;
+      }
+
       parsedQuestions = undefined;
 
       game.viewId = game.id = generateId();
@@ -309,6 +422,19 @@ function Socket(socket, io) {
       game.nickname = undefined;
       game.socketId = undefined;
       game.avatar = undefined;
+
+      game.helpers = {
+        percent50: true,
+        helpByLead: true,
+        helpByViewers: true,
+      };
+
+      game.voting = [0, 0, 0, 0];
+
+      if (game.timer) {
+        clearInterval(game.timer);
+        game.timer = undefined;
+      }
 
       parsedQuestions = undefined;
 

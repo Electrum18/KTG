@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import Head from "next/head";
 import { useRouter } from "next/router";
 
 import io from "socket.io-client";
@@ -8,6 +7,7 @@ import io from "socket.io-client";
 import Background from "../../components/background";
 import Light from "../../components/lighting";
 import LoginTablet from "../../components/tablets/enter-to-game";
+import Metadata from "../../components/metadata";
 
 export default function Join() {
   const [joinIndex, setJoinIndex] = useState();
@@ -59,10 +59,7 @@ export default function Join() {
 
   return (
     <>
-      <Head>
-        <title>Регистрация игрока | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="join" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />

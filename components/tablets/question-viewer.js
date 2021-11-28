@@ -25,6 +25,17 @@ const tabletStyles = [
   },
 ];
 
+const style = {
+  note: {
+    width: "fit-content",
+    right: "-30%",
+    position: "absolute",
+    bottom: "20%",
+    transform: "scaleX(-1)",
+  },
+  text: { transform: "rotate(-10deg) scaleX(-1)" },
+};
+
 function Hand({ selectedId }) {
   return (
     <div
@@ -46,6 +57,94 @@ function Hand({ selectedId }) {
   );
 }
 
+function Note({ voting }) {
+  const helpers = useQuestions((state) => state.helpers);
+
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    let timer;
+
+    if (time) {
+      timer = setTimeout(() => setTime(time - 1), 1e3);
+    }
+
+    if (!voting) clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [time]);
+
+  useEffect(() => {
+    setTime(+voting * 60);
+  }, [voting]);
+
+  return (
+    <div style={style.note}>
+      <div
+        className="absolute z-20 w-full h-full flex flex-col mt-4 justify-center pl-12 pr-6"
+        style={style.text}
+      >
+        {time ? (
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold tracking-widest text-center">
+              Голосование
+            </h1>
+
+            <p className="text-4xl font-bold tracking-widest text-center">
+              {time}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold tracking-widest text-center">
+              Подсказки
+            </h1>
+
+            <button
+              className={
+                "choose-button2 borders " +
+                (helpers.percent50 ? "" : "disabled")
+              }
+            >
+              50 на 50
+            </button>
+
+            <button
+              className={
+                "choose-button2 borders " +
+                (helpers.helpByLead ? "" : "disabled")
+              }
+            >
+              помощь ведущего
+            </button>
+
+            <button
+              className={
+                "choose-button2 borders " +
+                (helpers.helpByViewers ? "" : "disabled")
+              }
+            >
+              помощь зрителей
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="z-10">
+        <Image
+          src="/assets/note.png"
+          alt="Логотип"
+          width={565 / 2}
+          height={480 / 2}
+          loading="eager"
+        />
+      </div>
+    </div>
+  );
+}
+
 function Sounds() {
   const [playStart] = useSound("/sound/pen-at-paper.mp3", {
     volume: 0.25,
@@ -59,7 +158,11 @@ function Sounds() {
     volume: 0.5,
   });
 
-  return [playStart, playPlacePaper, playChoose];
+  const [playVoted] = useSound("/sound/vote.mp3", {
+    volume: 0.5,
+  });
+
+  return [playStart, playPlacePaper, playChoose, playVoted];
 }
 
 export default function QuestionViewerTablet({
@@ -67,10 +170,12 @@ export default function QuestionViewerTablet({
   choosedQuestion,
   setChoosedQuestion,
   socket,
+  voting,
+  votes,
 }) {
   const [animationState, setAnimationState] = useState(0);
 
-  const [playStart, playPlacePaper, playChoose] = Sounds();
+  const [playStart, playPlacePaper, playChoose, playVoted] = Sounds();
 
   const [inLevel, inStage, inQuestion, inVariants] = useQuestions(
     (state) => [state.level, state.stage, state.question, state.variants],
@@ -98,7 +203,9 @@ export default function QuestionViewerTablet({
       timer = setTimeout(() => setAnimationState(1), 1500);
     }
 
-    return timer;
+    return () => {
+      clearTimeout(timer);
+    };
   }, [animationState, playStart]);
 
   useEffect(() => {
@@ -108,6 +215,29 @@ export default function QuestionViewerTablet({
         break;
     }
   }, [animationState]);
+
+  const [playNotice] = useSound("/sound/notice.mp3", {
+    volume: 0.5,
+  });
+
+  const [votePercent, setVotePercent] = useState([0, 0, 0, 0]);
+  const [takenVote, setTakenVote] = useState();
+
+  useEffect(() => {
+    const max = votes.reduce((acc, val) => acc + val, 0);
+
+    setVotePercent(votes.map((val) => Math.round((val / max) * 100)));
+
+    if (max > 0) playVoted();
+  }, [votes]);
+
+  useEffect(() => {
+    setTakenVote(undefined);
+  }, [voting]);
+
+  useEffect(() => {
+    if (voting && playNotice) playNotice();
+  }, [voting && playNotice]);
 
   return (
     <div
@@ -136,13 +266,30 @@ export default function QuestionViewerTablet({
               key={quote}
               className={
                 "choose-button borders " +
-                (choosedQuestion && choosedQuestion === quote ? "" : "disabled")
+                ((choosedQuestion && choosedQuestion === quote) ||
+                ((takenVote === undefined || takenVote === id) && voting)
+                  ? ""
+                  : "disabled")
               }
+              onClick={() => {
+                if (takenVote === undefined && voting) {
+                  socket.emit("vote", id);
+                  setTakenVote(id);
+                  playChoose();
+                }
+              }}
             >
               {quote}
+              {votePercent[id] > 0 && (
+                <span className="text-blue-500">
+                  {" " + votePercent[id] + "%"}
+                </span>
+              )}
             </button>
           ))}
         </div>
+
+        <Note voting={voting} />
 
         {animationState > 1 && !choosedQuestion && (
           <Hand selectedId={selectedId} />

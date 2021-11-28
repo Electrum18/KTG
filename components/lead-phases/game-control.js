@@ -108,7 +108,15 @@ const subtextEnum = [
 
 const socketMethodEnum = ["question readed", undefined, "question taken"];
 
-function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
+function Paper({
+  gameLevel,
+  gameQuestion,
+  gamePhase,
+  gameChoose,
+  needsHelp,
+  socket,
+  voting,
+}) {
   const [disabled, setDisabled] = useState();
 
   const [playChoose] = useSound("/sound/click.mp3", {
@@ -119,6 +127,10 @@ function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
     volume: 0.5,
   });
 
+  const [playPlayerNotice] = useSound("/sound/notice2.mp3", {
+    volume: 0.2,
+  });
+
   useEffect(() => {
     setDisabled(gamePhase === 1);
   }, [gamePhase]);
@@ -126,6 +138,30 @@ function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
   useEffect(() => {
     if (gamePhase === 2 && playPlayerChoosed) playPlayerChoosed();
   }, [gamePhase, playPlayerChoosed]);
+
+  useEffect(() => {
+    if (gamePhase === 1 && (needsHelp || voting)) playPlayerNotice();
+  }, [gamePhase, needsHelp, voting]);
+
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    let timer;
+
+    if (time) {
+      timer = setTimeout(() => setTime(time - 1), 1e3);
+    }
+
+    if (!voting) clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [time]);
+
+  useEffect(() => {
+    setTime(+voting * 60);
+  }, [voting]);
 
   return (
     <div style={style.paper}>
@@ -137,9 +173,17 @@ function Paper({ gameLevel, gameQuestion, gamePhase, gameChoose, socket }) {
           Вопрос {gameLevel}
         </h1>
 
-        <p className="text-xl tracking-widest text-center my-6">
+        <p className="text-xl tracking-widest text-center my-4">
           {gameQuestion}
         </p>
+
+        {(voting || needsHelp) && (
+          <p className="text-xl text-green-500 tracking-widest text-center mb-2">
+            {voting
+              ? `Зрители голосуют ${time} секунд`
+              : "Игрок запросил помощь ведущего"}
+          </p>
+        )}
 
         <div className="text-base text-gray-500 tracking-widest mx-2">
           {gamePhase + 1 + " | " + subtextEnum[gamePhase]}
@@ -198,6 +242,8 @@ export default function GameControl({
   socket,
   userInfo,
   viewIndex,
+  needsHelp,
+  voting,
 }) {
   return (
     <>
@@ -207,6 +253,8 @@ export default function GameControl({
         gamePhase={gamePhase}
         gameChoose={gameChoose}
         socket={socket}
+        needsHelp={needsHelp}
+        voting={voting}
       />
 
       <PaperUpper viewIndex={viewIndex} />

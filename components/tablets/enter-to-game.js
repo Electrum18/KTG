@@ -141,6 +141,10 @@ export default function LoginTablet({ socket, preWaiting, setPreWaiting }) {
     }
   }, [animationState]);
 
+  useEffect(() => {
+    if (playPen) playPen();
+  }, [playPen]);
+
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState("");
 

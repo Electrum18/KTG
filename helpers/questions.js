@@ -5,8 +5,9 @@ const useQuestions = create((set) => ({
   level: 0,
   question: undefined,
   variants: undefined,
+  helpers: {},
 
-  setQuestions: ({ level, stage, question, variants }) =>
+  setQuestions: ({ level, stage, question, variants, helpers }) =>
     set(() => {
       const output = {};
 
@@ -15,6 +16,7 @@ const useQuestions = create((set) => ({
 
       if (question) output.question = question;
       if (variants) output.variants = variants;
+      if (helpers) output.helpers = helpers;
 
       return output;
     }),

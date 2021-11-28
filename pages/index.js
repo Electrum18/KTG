@@ -1,10 +1,12 @@
-import Head from "next/head";
 import Image from "next/image";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import io from "socket.io-client";
 
 import Background from "../components/background";
 import Light from "../components/lighting";
+import Metadata from "../components/metadata";
 
 const style = {
   corckboard: {
@@ -61,7 +63,9 @@ function Note() {
         className="absolute z-20 w-full h-full mt-4 flex flex-col justify-center"
         style={style.text2}
       >
-        <h1 className="text-6xl font-bold tracking-widest text-center">КТГ</h1>
+        <h1 className="text-2xl font-bold tracking-widest mx-16">
+          Кто хочет стать геймером?
+        </h1>
       </div>
 
       <div className="z-10">
@@ -78,16 +82,29 @@ function Note() {
 }
 
 export default function Home() {
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
-    fetch("/api/socketio");
-  });
+    fetch("/api/socketio").finally(() => {
+      const socket = io();
+
+      socket.on("connect", () => {
+        socket.emit("get lead notice");
+      });
+
+      setSocket(socket);
+
+      return () => {
+        socket.disconnect();
+
+        setSocket(null);
+      };
+    });
+  }, []);
 
   return (
     <>
-      <Head>
-        <title>Меню игры | КТГ</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Metadata page="index" />
 
       <main className="w-screen h-screen flex justify-center items-center overflow-hidden">
         <Background />

@@ -18,6 +18,10 @@ function addSpaces(value) {
 export default function NotepadScore() {
   const level = useQuestions((state) => state.level);
 
+  function idFromBelow(id) {
+    return prices.length - 1 - id;
+  }
+
   return (
     <div className="notepad absolute w-full h-full">
       <div className="absolute top-0 right-24 m-2">
@@ -27,10 +31,19 @@ export default function NotepadScore() {
               key={price}
               className={
                 "mx-4 -mt-2 text-xl tracking-widest " +
-                (level > prices.length - 1 - id ? "line-through" : "")
+                (level === idFromBelow(id) ? "text-red-500 " : "") +
+                (level > idFromBelow(id) ? "line-through " : "") +
+                (level <= idFromBelow(id) &&
+                level !== idFromBelow(id) &&
+                (idFromBelow(id) === 4 || idFromBelow(id) === 9)
+                  ? "text-blue-500"
+                  : "")
               }
             >
               {addSpaces(price.toString())}
+              {idFromBelow(id) === 4 || idFromBelow(id) === 9
+                ? " возврат подсказок"
+                : ""}
             </p>
           ))}
         </div>

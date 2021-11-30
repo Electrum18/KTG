@@ -366,11 +366,9 @@ function Socket(socket, io) {
   GameAPI(socket, io);
 
   socket.on("get lead notice", () => {
-    if (lead.noticed) return;
+    if (!lead.noticed) lead.noticed = lead.id;
     
-    socket.emit("get page notice", lead.id);
-
-    lead.noticed = true;
+    socket.emit("get page notice", lead.noticed);
   });
 
   socket.on("disconnect", () => {

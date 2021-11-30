@@ -63,8 +63,8 @@ function Note() {
         className="absolute z-20 w-full h-full mt-4 flex flex-col justify-center"
         style={style.text2}
       >
-        <h1 className="text-2xl font-bold tracking-widest mx-16">
-          Кто хочет стать геймером?
+        <h1 className="text-3xl font-bold tracking-widest mx-16">
+          Какой ты геймер?
         </h1>
       </div>
 
@@ -91,9 +91,9 @@ export default function Home() {
       socket.on("connect", () => {
         socket.emit("get lead notice");
       });
+
+      socket.on("get page notice", (vel) => console.log("Панель ведущего:", vel));
       
-      socket.on("get access url", (val) => conosle.log("Страница админ панели", val));
- 
       setSocket(socket);
 
       return () => {

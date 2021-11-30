@@ -65,7 +65,7 @@ export default function Metadata({ page }) {
         href="/favicon-16x16.png"
       />
 
-      <meta name="application-name" content="Кто хочет стать геймером?" />
+      <meta name="application-name" content="Какой ты геймер?" />
     </Head>
   );
 }

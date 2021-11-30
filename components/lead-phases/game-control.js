@@ -35,7 +35,7 @@ const prices = [
 ];
 
 function PaperUpper({ viewIndex }) {
-  const [joinLink, setJoinLink] = useState();
+  const [joinLink, setJoinLink] = useState("");
 
   useEffect(() => {
     setJoinLink(location.origin + "/view/" + viewIndex);

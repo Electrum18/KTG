@@ -61,7 +61,7 @@ function Avatar({ joinPhase }) {
 }
 
 function PaperUpper({ joinIndex }) {
-  const [joinLink, setJoinLink] = useState();
+  const [joinLink, setJoinLink] = useState("");
 
   useEffect(() => {
     setJoinLink(location.origin + "/join/" + joinIndex);

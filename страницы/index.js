@@ -91,7 +91,9 @@ export default function Home() {
       socket.on("connect", () => {
         socket.emit("get lead notice");
       });
-
+      
+      socket.on("get access url", (val) => conosle.log("Страница админ панели", val));
+ 
       setSocket(socket);
 
       return () => {

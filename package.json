@@ -5,12 +5,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_ENV=production node server.js",
     "lint": "next lint"
   },
   "dependencies": {
+    "build": "^0.1.4",
+    "express": "^4.17.1",
     "fs": "^0.0.1-security",
     "next": "latest",
     "path": "^0.12.7",

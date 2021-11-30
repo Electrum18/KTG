@@ -367,10 +367,8 @@ function Socket(socket, io) {
 
   socket.on("get lead notice", () => {
     if (lead.noticed) return;
-
-    console.log(
-      `\n----- АДРЕС ДОСТУПА К ПАНЕЛИ ВЕДУЩЕГО: /lead/${lead.id} -----\n`
-    );
+    
+    socket.emit("get access url", lead.id);
 
     lead.noticed = true;
   });

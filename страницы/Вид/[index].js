@@ -9,9 +9,9 @@ import Light from "../../components/lighting";
 import NotepadScore from "../../components/notepad-score";
 import IconsImages from "../../components/icons-images";
 import QuestionViewerTablet from "../../components/tablets/question-viewer";
+import Metadata from "../../components/metadata";
 
 import useQuestions from "../../helpers/questions";
-import Metadata from "../../configs/metadata";
 
 export default function Game() {
   const [gameIndex, setGameIndex] = useState();

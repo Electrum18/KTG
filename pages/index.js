@@ -85,21 +85,25 @@ export default function Home() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socket = io();
+    fetch("/api/socketio").finally(() => {
+      const socket = io();
 
-    socket.on("connect", () => {
-      socket.emit("get lead notice");
+      socket.on("connect", () => {
+        socket.emit("get lead notice");
+      });
+
+      socket.on("get page notice", (vel) =>
+        console.log("Панель ведущего:", vel)
+      );
+
+      setSocket(socket);
+
+      return () => {
+        socket.disconnect();
+
+        setSocket(null);
+      };
     });
-
-    socket.on("get page notice", (vel) => console.log("Панель ведущего:", vel));
-    
-    setSocket(socket);
-
-    return () => {
-      socket.disconnect();
-
-      setSocket(null);
-    };
   }, []);
 
   return (

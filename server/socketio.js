@@ -1,5 +1,3 @@
-import { Server } from "socket.io";
-
 let parsedQuestions;
 
 function parseQuestions(questions) {
@@ -12,12 +10,6 @@ function parseQuestions(questions) {
     })
     .filter((value) => value);
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 const generateId = () => Math.random().toString(36).substring(2);
 
@@ -367,7 +359,7 @@ function Socket(socket, io) {
 
   socket.on("get lead notice", () => {
     if (!lead.noticed) lead.noticed = lead.id;
-    
+
     socket.emit("get page notice", lead.noticed);
   });
 
@@ -440,14 +432,10 @@ function Socket(socket, io) {
   });
 }
 
-export default function (req, res) {
-  if (!res.socket.server.io) {
-    const io = new Server(res.socket.server, { transports: ['polling'] });
+function SocketIOServer(server) {
+  const io = require("socket.io")(server);
 
-    io.on("connection", (socket) => Socket(socket, io));
-
-    res.socket.server.io = io;
-  }
-
-  res.end();
+  io.on("connection", (socket) => Socket(socket, io));
 }
+
+module.exports = { SocketIOServer };

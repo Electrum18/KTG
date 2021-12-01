@@ -25,36 +25,34 @@ export default function Join() {
   const [preWaiting, setPreWaiting] = useState(false);
 
   useEffect(() => {
-    fetch("/api/socketio").finally(() => {
-      const socket = io();
+    const socket = io();
 
-      socket.on("connect", () => {
-        socket.emit("get join index");
-        socket.emit("is joining");
-      });
-
-      socket.on("leave", () => router.push("/"));
-
-      socket.on("set join index", setJoinIndex);
-
-      socket.on("player joined", () => {
-        setPreWaiting(false);
-      });
-
-      socket.on("game created", (statusOrIndex) => {
-        router.push("/game/" + statusOrIndex);
-      });
-
-      socket.on("game ended", () => router.push(`/`));
-
-      setSocket(socket);
-
-      return () => {
-        socket.disconnect();
-
-        setSocket(null);
-      };
+    socket.on("connect", () => {
+      socket.emit("get join index");
+      socket.emit("is joining");
     });
+
+    socket.on("leave", () => router.push("/"));
+
+    socket.on("set join index", setJoinIndex);
+
+    socket.on("player joined", () => {
+      setPreWaiting(false);
+    });
+
+    socket.on("game created", (statusOrIndex) => {
+      router.push("/game/" + statusOrIndex);
+    });
+
+    socket.on("game ended", () => router.push(`/`));
+
+    setSocket(socket);
+
+    return () => {
+      socket.disconnect();
+
+      setSocket(null);
+    };
   }, []);
 
   return (

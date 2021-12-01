@@ -1,20 +1,20 @@
-const app = require('express')();
-const server = require('http').Server(app);
-const next = require('next');
+const app = require("express")();
+const server = require("http").Server(app);
+const { SocketIOServer } = require("./server/socketio");
+const next = require("next");
 
-const dev = process.env.NODE_ENV !== 'production'
-const nextApp = next({ dev })
-const nextHandler = nextApp.getRequestHandler()
-
-const port = process.env.port || 80;
+const nextApp = next({ dev: false });
+const nextHandler = nextApp.getRequestHandler();
 
 nextApp.prepare().then(() => {
-    app.get("*", (req, res) => {
-        return nextHandler(req, res);
-    })
-    
-    server.listen(80, (err) => {
-        if (err) throw err;
-        console.log('> Ready on http://localhost:' + port);
-    })
-})
+  app.get("*", (req, res) => {
+    return nextHandler(req, res);
+  });
+
+  SocketIOServer(server);
+
+  server.listen(80, (err) => {
+    if (err) throw err;
+    console.log("> Ready on http://localhost:80");
+  });
+});

@@ -36,42 +36,40 @@ export default function Game() {
   const [choosedQuestion, setChoosedQuestion] = useState(null);
 
   useEffect(() => {
-    fetch("/api/socketio").finally(() => {
-      const socket = io();
+    const socket = io();
 
-      socket.on("connect", () => {
-        socket.emit("get view index");
-      });
-
-      socket.on("leave", () => location.reload());
-
-      socket.on("set game index", setGameIndex);
-      socket.on("set game phase", setQuestions);
-      socket.on("set game questions", setQuestions);
-
-      socket.on("get game helpers", setQuestions);
-      socket.on("get game players", setPlayers);
-
-      socket.on("game ended", (score) => {
-        router.push(`/result?score=${score}&player=lead`);
-      });
-
-      socket.on("variant pointed", setSelectedId);
-      socket.on("choosed question", setChoosedQuestion);
-
-      socket.on("player help by viewers", () => setVoting(true));
-      socket.on("player help by viewers stop", () => setVoting(false));
-
-      socket.on("get game voting", setVotes);
-
-      setSocket(socket);
-
-      return () => {
-        socket.disconnect();
-
-        setSocket(null);
-      };
+    socket.on("connect", () => {
+      socket.emit("get view index");
     });
+
+    socket.on("leave", () => location.reload());
+
+    socket.on("set game index", setGameIndex);
+    socket.on("set game phase", setQuestions);
+    socket.on("set game questions", setQuestions);
+
+    socket.on("get game helpers", setQuestions);
+    socket.on("get game players", setPlayers);
+
+    socket.on("game ended", (score) => {
+      router.push(`/result?score=${score}&player=lead`);
+    });
+
+    socket.on("variant pointed", setSelectedId);
+    socket.on("choosed question", setChoosedQuestion);
+
+    socket.on("player help by viewers", () => setVoting(true));
+    socket.on("player help by viewers stop", () => setVoting(false));
+
+    socket.on("get game voting", setVotes);
+
+    setSocket(socket);
+
+    return () => {
+      socket.disconnect();
+
+      setSocket(null);
+    };
   }, []);
 
   return (

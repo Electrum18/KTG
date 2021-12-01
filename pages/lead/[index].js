@@ -102,67 +102,63 @@ export default function Lead() {
   }, [index, leadIndex, socket]);
 
   useEffect(() => {
-    fetch("/api/socketio").finally(() => {
-      const socket = io();
+    const socket = io();
 
-      socket.on("connect", () => {
-        socket.emit("get lead index");
-      });
-
-      socket.on("set lead index", setLeadIndex);
-
-      socket.on("lead joined", () => router.push("/"));
-      socket.on("leave", () => location.reload());
-
-      socket.on("set join index", setJoinIndex);
-      socket.on("set game index", setGameIndex);
-      socket.on("set view index", setViewIndex);
-
-      socket.on("lead telled", () => setGamePhase(1));
-
-      socket.on("set game level", setGameLevel);
-      socket.on("set game question", (question) => {
-        setQameQuestion(question);
-        setGamePhase(0);
-        setGameChoose("");
-        setNeedsHelp(false);
-      });
-
-      socket.on("choosed question", (question) => {
-        setGamePhase(2);
-        setGameChoose(question);
-      });
-
-      socket.on("set stage", setPhase);
-
-      socket.on("player ready", (nickname, avatar) =>
-        setJoinPhase([2, nickname, avatar])
-      );
-
-      socket.on("player joined", () => setJoinPhase([1, undefined, undefined]));
-      socket.on("player unjoined", () =>
-        setJoinPhase([0, undefined, undefined])
-      );
-
-      socket.on("get player data", setUserInfo);
-
-      socket.on("game ended", (score) => {
-        router.push(`/result?score=${score}&player=lead`);
-      });
-
-      socket.on("player needs help", () => setNeedsHelp(true));
-
-      socket.on("player help by viewers", () => setVoting(true));
-      socket.on("player help by viewers stop", () => setVoting(false));
-
-      setSocket(socket);
-
-      return () => {
-        socket.disconnect();
-
-        setSocket(null);
-      };
+    socket.on("connect", () => {
+      socket.emit("get lead index");
     });
+
+    socket.on("set lead index", setLeadIndex);
+
+    socket.on("lead joined", () => router.push("/"));
+    socket.on("leave", () => location.reload());
+
+    socket.on("set join index", setJoinIndex);
+    socket.on("set game index", setGameIndex);
+    socket.on("set view index", setViewIndex);
+
+    socket.on("lead telled", () => setGamePhase(1));
+
+    socket.on("set game level", setGameLevel);
+    socket.on("set game question", (question) => {
+      setQameQuestion(question);
+      setGamePhase(0);
+      setGameChoose("");
+      setNeedsHelp(false);
+    });
+
+    socket.on("choosed question", (question) => {
+      setGamePhase(2);
+      setGameChoose(question);
+    });
+
+    socket.on("set stage", setPhase);
+
+    socket.on("player ready", (nickname, avatar) =>
+      setJoinPhase([2, nickname, avatar])
+    );
+
+    socket.on("player joined", () => setJoinPhase([1, undefined, undefined]));
+    socket.on("player unjoined", () => setJoinPhase([0, undefined, undefined]));
+
+    socket.on("get player data", setUserInfo);
+
+    socket.on("game ended", (score) => {
+      router.push(`/result?score=${score}&player=lead`);
+    });
+
+    socket.on("player needs help", () => setNeedsHelp(true));
+
+    socket.on("player help by viewers", () => setVoting(true));
+    socket.on("player help by viewers stop", () => setVoting(false));
+
+    setSocket(socket);
+
+    return () => {
+      socket.disconnect();
+
+      setSocket(null);
+    };
   }, []);
 
   return (

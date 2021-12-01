@@ -9,6 +9,8 @@ import Background from "../components/background";
 import Light from "../components/lighting";
 import Metadata from "../components/metadata";
 
+import prices from "../configs/score";
+
 const style = {
   corckboard: {
     filter: "drop-shadow(2rem 5rem 5rem black)",
@@ -23,11 +25,6 @@ const style = {
   },
   text: { transform: "rotate(-5deg)" },
 };
-
-const prices = [
-  1_000_000, 500_000, 250_000, 125_000, 64_000, 32_000, 16_000, 8_000, 4_000,
-  2_000, 1_000, 500, 300, 200, 100, 0,
-];
 
 function addSpaces(value) {
   if (value.length > 6) {

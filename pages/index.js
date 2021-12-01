@@ -93,7 +93,7 @@ export default function Home() {
       });
 
       socket.on("get page notice", (vel) =>
-        console.log("Панель ведущего:", vel)
+        console.log("Панель ведущего: /lead/" + vel)
       );
 
       setSocket(socket);

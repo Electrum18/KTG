@@ -66,6 +66,7 @@ export default function Metadata({ page }) {
       />
 
       <meta name="application-name" content="Какой ты геймер?" />
+      <meta httpEquiv="Content-Security-Policy" content="font-src 'self' data: fonts.gstatic.com;" />
     </Head>
   );
 }

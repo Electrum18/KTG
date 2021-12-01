@@ -442,7 +442,7 @@ function Socket(socket, io) {
 
 export default function (req, res) {
   if (!res.socket.server.io) {
-    const io = new Server(res.socket.server);
+    const io = new Server(res.socket.server, { transports: ['polling'] });
 
     io.on("connection", (socket) => Socket(socket, io));
 

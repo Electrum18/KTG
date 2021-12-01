@@ -2,10 +2,7 @@ import Image from "next/image";
 
 import useQuestions from "../helpers/questions";
 
-const prices = [
-  1_000_000, 500_000, 250_000, 125_000, 64_000, 32_000, 16_000, 8_000, 4_000,
-  2_000, 1_000, 500, 300, 200, 100,
-];
+import prices from "../configs/score";
 
 function addSpaces(value) {
   if (value.length > 6) {

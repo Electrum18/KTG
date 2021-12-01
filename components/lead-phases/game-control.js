@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import useSound from "use-sound";
 
+import prices from "../../configs/score";
+
 const style = {
   paper: {
     width: "fit-content",
@@ -28,11 +30,6 @@ const style = {
   },
   text: { transform: "rotate(-5deg)" },
 };
-
-const prices = [
-  1_000_000, 500_000, 250_000, 125_000, 64_000, 32_000, 16_000, 8_000, 4_000,
-  2_000, 1_000, 500, 300, 200, 100, 0,
-];
 
 function PaperUpper({ viewIndex }) {
   const [joinLink, setJoinLink] = useState("");

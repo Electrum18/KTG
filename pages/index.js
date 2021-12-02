@@ -85,7 +85,7 @@ export default function Home() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({ transports: ["polling"] });
 
     socket.on("connect", () => {
       socket.emit("get lead notice");

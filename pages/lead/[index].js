@@ -102,7 +102,7 @@ export default function Lead() {
   }, [index, leadIndex, socket]);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({ transports: ["polling"] });
 
     socket.on("connect", () => {
       socket.emit("get lead index");

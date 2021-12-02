@@ -35,7 +35,7 @@ export default function Game() {
   const setQuestions = useQuestions((state) => state.setQuestions);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({ transports: ["polling"] });
 
     socket.on("connect", () => {
       socket.emit("get game index");

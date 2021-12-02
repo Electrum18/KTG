@@ -36,7 +36,7 @@ export default function Game() {
   const [choosedQuestion, setChoosedQuestion] = useState(null);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({ transports: ["polling"] });
 
     socket.on("connect", () => {
       socket.emit("get view index");

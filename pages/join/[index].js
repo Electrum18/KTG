@@ -25,7 +25,7 @@ export default function Join() {
   const [preWaiting, setPreWaiting] = useState(false);
 
   useEffect(() => {
-    const socket = io();
+    const socket = io({ transports: ["polling"] });
 
     socket.on("connect", () => {
       socket.emit("get join index");

@@ -13,8 +13,8 @@ nextApp.prepare().then(() => {
 
   SocketIOServer(server);
 
-  server.listen(80, (err) => {
+  server.listen(3000, (err) => {
     if (err) throw err;
-    console.log("> Ready on http://localhost:80");
+    console.log("> Ready on http://localhost:3000");
   });
 });
